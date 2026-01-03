@@ -1,0 +1,47 @@
+<picture>
+  <!-- The media queries determine the image based on website theme -->
+  <source media="(prefers-color-scheme: dark)" srcset=".assets/repository_banner/dark_mode.png">
+  <source media="(prefers-color-scheme: light)" srcset=".assets/repository_banner/light_mode.png">
+  <!-- Fallback to light mode variant if no match -->
+  <img alt="LimeOS Banner" src=".assets/repository_banner/light_mode.png">
+</picture>
+
+######
+
+This ISO builder generates bootable LimeOS installation images from the
+project’s build artifacts. It assembles the root filesystem, adds the installer
+and boot components, and produces a reproducible ISO with the correct bootloader
+setup for supported targets.
+
+> This application has **not entered development** yet. Once work begins, this
+> notice will be updated to state that the application is a work in progress.
+
+### Philosophy
+
+This project is guided by a clear and deliberate philosophy. It is built on the
+belief that software should be understandable, honest, and built to last. Its
+core is structured around four virtues: Logic, Integrity, Minimalism, and
+Endurance. Each one provides a foundation for decision-making and long-term
+design clarity.
+
+For more details, see `PHILOSOPHY.md`.
+
+### Contributing
+
+We welcome all contributions that help shape and improve this project. Whether
+you're reporting bugs, suggesting new features, improving documentation, or
+submitting code changes, your input is valued and appreciated. If you are
+planning on making large code changes, please consult the project maintainers
+beforehand.
+
+To get started, see `CONTRIBUTING.md`.
+
+### License
+
+This project is licensed under the GPL-3.0 License. This license reflects our
+commitment to ensuring that this software remains free and open-source.
+We believe in the values of freedom, transparency, and collaboration that the
+GPL-3.0 promotes, allowing users to freely use, modify, and distribute the
+software, ensuring that it remains a community-driven project.
+
+For more details, see `LICENSE.md`.
