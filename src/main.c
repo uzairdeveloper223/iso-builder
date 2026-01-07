@@ -5,11 +5,14 @@
 
 #include "all.h"
 
-/** The directory where LimeOS component binaries are downloaded. */
-#define COMPONENTS_DIRECTORY "/tmp/limeos-components"
+/** The base directory for all build files. */
+#define BUILD_DIRECTORY "./build"
 
-/** The maximum length for log message strings. */
-#define MAX_MESSAGE_LENGTH 256
+/** The directory where component binaries are downloaded. */
+#define COMPONENTS_DIRECTORY BUILD_DIRECTORY "/components"
+
+/** The directory where the root filesystem is created. */
+#define ROOTFS_DIRECTORY BUILD_DIRECTORY "/rootfs"
 
 static void print_usage(const char *program_name)
 {
@@ -26,13 +29,12 @@ int main(int argc, char *argv[])
 {
     const char *version = NULL;
 
+    // Parse command-line arguments.
+    int option;
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
         {0, 0, 0, 0}
     };
-
-    // Parse command-line arguments.
-    int option;
     while ((option = getopt_long(argc, argv, "h", long_options, NULL)) != -1)
     {
         switch (option)
@@ -49,7 +51,7 @@ int main(int argc, char *argv[])
     // Validate that a version argument was provided.
     if (optind >= argc)
     {
-        log_error("Missing required argument: version");
+        LOG_ERROR("Missing required argument: version");
         print_usage(argv[0]);
         return 1;
     }
@@ -57,34 +59,69 @@ int main(int argc, char *argv[])
     // Extract the version from positional arguments.
     version = argv[optind];
 
-    // Print the banner.
-    printf("LimeOS ISO Builder v%s\n\n", version);
-
-    // Initialize the fetch module.
-    if (fetch_init() != 0)
+    // Validate the version format.
+    if (validate_version(version) != 0)
     {
-        log_error("Failed to initialize fetch module");
+        LOG_ERROR("Invalid version format: %s (expected: X.Y.Z or vX.Y.Z)", version);
+        return 1;
+    }
+
+    // Clean up old build files.
+    LOG_INFO("Cleaning old build files...");
+    run_command("rm -rf " BUILD_DIRECTORY);
+
+    // Initialize the collector module.
+    if (init_collector() != 0)
+    {
+        LOG_ERROR("Failed to initialize collector module");
         return 1;
     }
 
     // Log the build operation.
-    char message[MAX_MESSAGE_LENGTH];
-    snprintf(message, sizeof(message), "Building ISO for version %s", version);
-    log_info(message);
+    LOG_INFO("Building ISO for version %s", version);
 
     // Fetch all required components.
     if (fetch_all_components(version, COMPONENTS_DIRECTORY) != 0)
     {
-        log_error("Failed to fetch components");
-        fetch_cleanup();
+        LOG_ERROR("Failed to fetch components");
+        cleanup_collector();
         return 1;
     }
 
-    // Log successful completion of phase 1.
-    log_success("Phase 1 complete: Components fetched");
+    LOG_INFO("Phase 1 complete: Components fetched");
 
-    // Clean up the fetch module.
-    fetch_cleanup();
+    // Clean up the collector module.
+    cleanup_collector();
+
+    // Create the root filesystem.
+    if (create_rootfs(ROOTFS_DIRECTORY) != 0)
+    {
+        LOG_ERROR("Failed to create rootfs");
+        return 1;
+    }
+
+    // Strip unnecessary files from the rootfs.
+    if (strip_rootfs(ROOTFS_DIRECTORY) != 0)
+    {
+        LOG_ERROR("Failed to strip rootfs");
+        return 1;
+    }
+
+    // Install component binaries into the rootfs.
+    if (install_components(ROOTFS_DIRECTORY, COMPONENTS_DIRECTORY) != 0)
+    {
+        LOG_ERROR("Failed to install components");
+        return 1;
+    }
+
+    // Configure the init system.
+    if (configure_init(ROOTFS_DIRECTORY) != 0)
+    {
+        LOG_ERROR("Failed to configure init");
+        return 1;
+    }
+
+    LOG_INFO("Phase 2 complete: Rootfs created");
 
     return 0;
 }

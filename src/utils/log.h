@@ -1,22 +1,43 @@
 #pragma once
+#include "../all.h"
 
 /**
- * Prints an informational message to stdout.
- *
- * @param message The message to print.
+ * Logs a formatted message with the INFO severity level, including source 
+ * location and timestamp, to stdout.
+ * 
+ * @param message `printf()` style format string.
+ * @param ... Optional format arguments.
  */
-void log_info(const char *message);
+#define LOG_INFO(message, ...) log_message("INFO", __FILE__, __LINE__, message, ##__VA_ARGS__)
 
 /**
- * Prints a success message to stdout.
- *
- * @param message The message to print.
+ * Logs a formatted message with the WARNING severity level, including source 
+ * location and timestamp, to stdout.
+ * 
+ * @param message `printf()` style format string.
+ * @param ... Optional format arguments.
  */
-void log_success(const char *message);
+#define LOG_WARNING(message, ...) log_message("WARNING", __FILE__, __LINE__, message, ##__VA_ARGS__)
 
 /**
- * Prints an error message to stderr.
- *
- * @param message The message to print.
+ * Logs a formatted message with the ERROR severity level, including source 
+ * location and timestamp, to stdout.
+ * 
+ * @param message `printf()` style format string.
+ * @param ... Optional format arguments.
  */
-void log_error(const char *message);
+#define LOG_ERROR(message, ...) log_message("ERROR", __FILE__, __LINE__, message, ##__VA_ARGS__)
+
+/**
+ * Logs a message to stdout.
+ * 
+ * @param severity The severity level of the message.
+ * @param file The file where the message originated.
+ * @param line The line number where the message originated.
+ * @param message The message to log, with optional format specifiers.
+ * @param ... The arguments to format the message with.
+ * 
+ * @warning Don't use directly! Use the `LOG_INFO`, `LOG_WARNING` and 
+ * `LOG_ERROR` macros instead.
+ */
+void log_message(const char* severity, const char* file, int line, const char* message, ...);

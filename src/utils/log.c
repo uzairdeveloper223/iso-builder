@@ -1,20 +1,22 @@
 /**
- * This code is responsible for logging messages.
+ * This code is responsible for logging messages with timestamps and source locations.
  */
 
-#include "all.h"
+#include "../all.h"
 
-void log_info(const char *message)
+void log_message(const char* severity, const char* file, int line, const char* message, ...)
 {
-    printf("[INFO] %s\n", message);
-}
+    // Get current time and format it as HH:MM:SS.
+    char time_string[20];
+    time_t time_now = time(NULL);
+    strftime(time_string, sizeof(time_string), "%H:%M:%S", localtime(&time_now));
 
-void log_success(const char *message)
-{
-    printf("[OK] %s\n", message);
-}
+    // Format the provided message with the variable arguments.
+    va_list vargs;
+    va_start(vargs, message);
+    char formatted_message[1024];
+    vsnprintf(formatted_message, sizeof(formatted_message), message, vargs);
+    va_end(vargs);
 
-void log_error(const char *message)
-{
-    fprintf(stderr, "[ERROR] %s\n", message);
+    printf("[%s][%s:%d] %s: %s\n", time_string, file, line, severity, formatted_message);
 }

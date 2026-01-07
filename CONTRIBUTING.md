@@ -56,11 +56,60 @@ section listed first will take precedence.
 
 ### Building the ISO builder
 
-This subsection will be added once the project enters development.
+This subsection explains how to build the ISO builder from source.
+
+First, install the required dependencies. For Debian-based Linux distributions,
+run:
+
+```bash
+sudo apt install \
+    clang \
+    make \
+    libcurl4-openssl-dev \
+    libjson-c-dev
+```
+
+If you're not using a Debian-based distribution, package names may differ.
+In that case, consult your distribution's package repositories
+(package listings) to find the correct package names for your system.
+
+Then, from the root directory of the repository, build the project by running:
+
+```bash
+make
+```
+
+Finally, verify the build succeeded by checking that the executable exists at
+`./bin/limeos-iso-builder`.
 
 ### Running the ISO builder
 
-This subsection will be added once the project enters development.
+This subsection explains how to run the ISO builder after building it.
+
+First, ensure the required commands are available on your system: `debootstrap`,
+`mkdir`, `cp`, `rm`, `ln`, `find`, and `chmod`. These are typically
+pre-installed on most Linux distributions, except for `debootstrap` which may
+need to be installed separately:
+
+```bash
+sudo apt install debootstrap
+```
+
+Then, view the available options by running:
+
+```bash
+./bin/limeos-iso-builder --help
+```
+
+Finally, run the ISO builder with root privileges since it performs rootfs
+creation and system configuration operations. Provide a version number in
+semantic versioning format (e.g., `1.0.0`):
+
+```bash
+sudo ./bin/limeos-iso-builder 1.0.0
+```
+
+The build artifacts will be placed in the `./build` directory.
 
 &nbsp;
 
