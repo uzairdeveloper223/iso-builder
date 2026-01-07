@@ -145,6 +145,8 @@ semantic versioning format (e.g., `1.0.0`):
 sudo ./bin/limeos-iso-builder 1.0.0
 ```
 
+The `.iso` image will be created in the directory you run the command from.
+
 If you want to use local LimeOS component binaries (e.g.,
 `limeos-installation-wizard`) instead of having the ISO builder download them,
 place them in `./bin`. The ISO builder will automatically detect and prefer them

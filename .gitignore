@@ -1,7 +1,6 @@
 # Ignore object and binary files
 obj/
 bin/
-dist/
 tmp/
 
 # Ignore editor and system files
