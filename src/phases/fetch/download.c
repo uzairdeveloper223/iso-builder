@@ -5,7 +5,7 @@
 
 #include "all.h"
 
-static int copy_local(const char *name, const char *output_directory)
+static int copy_local_component(const char *name, const char *output_directory)
 {
     char local_path[COMMAND_PATH_MAX_LENGTH];
     char output_path[COMMAND_PATH_MAX_LENGTH];
@@ -36,7 +36,7 @@ static int copy_local(const char *name, const char *output_directory)
     return 0;
 }
 
-static size_t handle_write_data(
+static size_t write_download_chunk(
     void *data, size_t size, size_t count, void *stream
 )
 {
@@ -111,7 +111,7 @@ static int download_remote(
 
     // Configure curl options for the download.
     curl_easy_setopt(curl, CURLOPT_URL, url);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, handle_write_data);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_download_chunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, output_file);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, CONFIG_USER_AGENT);
@@ -173,7 +173,7 @@ int fetch_component(
 )
 {
     // Try local binary first.
-    if (copy_local(name, output_directory) == 0)
+    if (copy_local_component(name, output_directory) == 0)
     {
         return 0;
     }

@@ -21,7 +21,7 @@ typedef struct
     size_t capacity;
 } ResponseBuffer;
 
-static size_t handle_api_response(
+static size_t append_api_response_chunk(
     void *contents,
     size_t size,
     size_t count,
@@ -95,7 +95,7 @@ static int fetch_releases_json(
     // Configure curl options for the API request.
     curl_easy_setopt(curl, CURLOPT_URL, url);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, handle_api_response);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, append_api_response_chunk);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, CONFIG_USER_AGENT);
 

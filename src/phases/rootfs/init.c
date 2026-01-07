@@ -69,7 +69,7 @@ static int enable_installer_service(const char *rootfs_path)
     return 0;
 }
 
-static int set_default_target(const char *rootfs_path)
+static int set_default_systemd_target(const char *rootfs_path)
 {
     char link_path[COMMAND_PATH_MAX_LENGTH];
 
@@ -84,7 +84,7 @@ static int set_default_target(const char *rootfs_path)
     return 0;
 }
 
-static int disable_getty(const char *rootfs_path)
+static int disable_tty1_getty(const char *rootfs_path)
 {
     char getty_path[COMMAND_PATH_MAX_LENGTH];
 
@@ -120,13 +120,13 @@ int configure_init(const char *rootfs_path)
     }
 
     // Set multi-user target as the default boot target.
-    if (set_default_target(rootfs_path) != 0)
+    if (set_default_systemd_target(rootfs_path) != 0)
     {
         return -3;
     }
 
     // Disable getty on tty1 to prevent login prompt conflicts.
-    if (disable_getty(rootfs_path) != 0)
+    if (disable_tty1_getty(rootfs_path) != 0)
     {
         return -4;
     }
