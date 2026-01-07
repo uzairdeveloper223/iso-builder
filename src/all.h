@@ -21,16 +21,26 @@
 /** The maximum length for URL strings. */
 #define MAX_URL_LENGTH 512
 
-/** The list of LimeOS component binaries required for the ISO. */
-static const char *COMPONENTS[] = {
-    "window-manager",
-    "display-manager",
+/** The list of required LimeOS component binaries. */
+static const char *REQUIRED_COMPONENTS[] = {
     "installation-wizard"
 };
 
-/** The number of components in the COMPONENTS array. */
-#define COMPONENTS_COUNT (int)(sizeof(COMPONENTS) / sizeof(COMPONENTS[0]))
+/** The number of required components. */
+#define REQUIRED_COMPONENTS_COUNT \
+    (int)(sizeof(REQUIRED_COMPONENTS) / sizeof(REQUIRED_COMPONENTS[0]))
 
+/** The list of optional LimeOS component binaries. */
+static const char *OPTIONAL_COMPONENTS[] = {
+    "window-manager",
+    "display-manager"
+};
+
+/** The number of optional components. */
+#define OPTIONAL_COMPONENTS_COUNT \
+    (int)(sizeof(OPTIONAL_COMPONENTS) / sizeof(OPTIONAL_COMPONENTS[0]))
+
+#include "boot.h"
 #include "collector.h"
 #include "version.h"
 #include "rootfs/components.h"

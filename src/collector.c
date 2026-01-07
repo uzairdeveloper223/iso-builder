@@ -13,8 +13,8 @@ static int copy_local(const char *name, const char *output_directory)
     char local_path[MAX_PATH_LENGTH];
     char output_path[MAX_PATH_LENGTH];
 
-    // Construct the local binary path.
-    snprintf(local_path, sizeof(local_path), "%s/%s", "./bin", name);
+    // Construct the local binary path with limeos- prefix.
+    snprintf(local_path, sizeof(local_path), "./bin/limeos-%s", name);
 
     // Check if the local binary exists.
     if (!file_exists(local_path))
@@ -34,7 +34,7 @@ static int copy_local(const char *name, const char *output_directory)
         return -1;
     }
 
-    LOG_INFO("Using local %s", name);
+    LOG_INFO("Using local limeos-%s", name);
 
     return 0;
 }
@@ -164,7 +164,6 @@ static int download_remote(
         return -1;
     }
 
-    // Log successful download.
     LOG_INFO("Downloaded %s", name);
 
     return 0;
@@ -188,20 +187,28 @@ int fetch_component(
 
 int fetch_all_components(const char *version, const char *output_directory)
 {
-    // Log the start of component fetching.
     LOG_INFO("Fetching LimeOS components...");
 
-    // Fetch each component sequentially.
-    for (int i = 0; i < COMPONENTS_COUNT; i++)
+    // Fetch required components.
+    for (int i = 0; i < REQUIRED_COMPONENTS_COUNT; i++)
     {
-        if (fetch_component(COMPONENTS[i], version, output_directory) != 0)
+        if (fetch_component(REQUIRED_COMPONENTS[i], version, output_directory) != 0)
         {
+            LOG_ERROR("Required component failed: %s", REQUIRED_COMPONENTS[i]);
             return -1;
         }
     }
 
-    // Log successful completion.
-    LOG_INFO("All components fetched successfully");
+    // Fetch optional components.
+    for (int i = 0; i < OPTIONAL_COMPONENTS_COUNT; i++)
+    {
+        if (fetch_component(OPTIONAL_COMPONENTS[i], version, output_directory) != 0)
+        {
+            LOG_WARNING("Optional component skipped: %s", OPTIONAL_COMPONENTS[i]);
+        }
+    }
+
+    LOG_INFO("All required components fetched successfully");
 
     return 0;
 }

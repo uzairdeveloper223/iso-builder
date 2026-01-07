@@ -14,6 +14,9 @@
 /** The directory where the root filesystem is created. */
 #define ROOTFS_DIRECTORY BUILD_DIRECTORY "/rootfs"
 
+/** The path to the splash logo image. */
+#define SPLASH_LOGO_PATH "./assets/splash.png"
+
 static void print_usage(const char *program_name)
 {
     printf("Usage: %s <version> [options]\n", program_name);
@@ -28,6 +31,13 @@ static void print_usage(const char *program_name)
 int main(int argc, char *argv[])
 {
     const char *version = NULL;
+
+    // Verify the program is running as root.
+    if (geteuid() != 0)
+    {
+        LOG_ERROR("This program must be run as root");
+        return 1;
+    }
 
     // Parse command-line arguments.
     int option;
@@ -122,6 +132,29 @@ int main(int argc, char *argv[])
     }
 
     LOG_INFO("Phase 2 complete: Rootfs created");
+
+    // Configure GRUB for UEFI boot.
+    if (setup_grub(ROOTFS_DIRECTORY) != 0)
+    {
+        LOG_ERROR("Failed to configure GRUB");
+        return 1;
+    }
+
+    // Configure isolinux for BIOS boot.
+    if (setup_isolinux(ROOTFS_DIRECTORY) != 0)
+    {
+        LOG_ERROR("Failed to configure isolinux");
+        return 1;
+    }
+
+    // Configure Plymouth splash screen.
+    if (setup_splash(ROOTFS_DIRECTORY, SPLASH_LOGO_PATH) != 0)
+    {
+        LOG_ERROR("Failed to configure splash screen");
+        return 1;
+    }
+
+    LOG_INFO("Phase 3 complete: Boot configured");
 
     return 0;
 }

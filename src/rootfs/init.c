@@ -111,17 +111,14 @@ int configure_init(const char *rootfs_path)
     {
         return -1;
     }
-
     if (enable_installer_service(rootfs_path) != 0)
     {
         return -1;
     }
-
     if (set_default_target(rootfs_path) != 0)
     {
         return -1;
     }
-
     if (disable_getty(rootfs_path) != 0)
     {
         return -1;

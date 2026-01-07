@@ -11,7 +11,6 @@ int create_rootfs(const char *path)
 {
     char command[MAX_COMMAND_LENGTH];
 
-    // Log the start of rootfs creation.
     LOG_INFO("Creating rootfs at %s", path);
 
     // Run debootstrap to create a minimal Debian rootfs.
@@ -23,6 +22,31 @@ int create_rootfs(const char *path)
     if (run_command(command) != 0)
     {
         LOG_ERROR("Command failed: %s", command);
+        return -1;
+    }
+
+    // Install required packages into the rootfs.
+    LOG_INFO("Installing required packages...");
+    snprintf(
+        command, sizeof(command),
+        "chroot %s apt-get update", path
+    );
+    if (run_command(command) != 0)
+    {
+        LOG_ERROR("Failed to update package lists");
+        return -1;
+    }
+
+    // Install linux-image-amd64 and plymouth.
+    snprintf(
+        command, sizeof(command),
+        "chroot %s apt-get install -y --no-install-recommends "
+        "linux-image-amd64 plymouth",
+        path
+    );
+    if (run_command(command) != 0)
+    {
+        LOG_ERROR("Failed to install required packages");
         return -1;
     }
 

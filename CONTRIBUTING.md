@@ -62,12 +62,16 @@ First, install the required dependencies. For Debian-based Linux distributions,
 run:
 
 ```bash
-sudo apt install \
-    clang \
-    make \
-    libcurl4-openssl-dev \
-    libjson-c-dev
+sudo apt install clang make libcurl4-openssl-dev libjson-c-dev
 ```
+
+To verify all build dependencies are installed, run:
+
+```bash
+dpkg -s clang make libcurl4-openssl-dev libjson-c-dev >/dev/null 2>&1 && echo "OK"
+```
+
+The output should be "OK" if all is installed, nothing if any are missing.
 
 If you're not using a Debian-based distribution, package names may differ.
 In that case, consult your distribution's package repositories
@@ -89,11 +93,20 @@ This subsection explains how to run the ISO builder after building it.
 First, ensure the required commands are available on your system: `debootstrap`,
 `mkdir`, `cp`, `rm`, `ln`, `find`, and `chmod`. These are typically
 pre-installed on most Linux distributions, except for `debootstrap` which may
-need to be installed separately:
+need to be installed separately. Additionally, `isolinux` and `syslinux-common`
+are required for boot loader configuration:
 
 ```bash
-sudo apt install debootstrap
+sudo apt install debootstrap isolinux syslinux-common
 ```
+
+To verify all runtime dependencies are installed, run:
+
+```bash
+dpkg -s debootstrap isolinux syslinux-common >/dev/null 2>&1 && echo "OK"
+```
+
+The output should be "OK" if all is installed, nothing if any are missing.
 
 Then, view the available options by running:
 
