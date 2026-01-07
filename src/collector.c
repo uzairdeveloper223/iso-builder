@@ -8,10 +8,7 @@
 /** The GitHub organization hosting LimeOS component repositories. */
 #define GITHUB_ORG "limeos-org"
 
-static int copy_local(
-    const char *name,
-    const char *output_directory
-)
+static int copy_local(const char *name, const char *output_directory)
 {
     char local_path[MAX_PATH_LENGTH];
     char output_path[MAX_PATH_LENGTH];
@@ -61,10 +58,7 @@ void cleanup_collector(void)
 }
 
 static size_t handle_write_data(
-    void *data,
-    size_t size,
-    size_t count,
-    void *stream
+    void *data, size_t size, size_t count, void *stream
 )
 {
     return fwrite(data, size, count, (FILE *)stream);
