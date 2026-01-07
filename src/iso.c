@@ -144,7 +144,10 @@ static int setup_efi_image(const char *staging_path)
 
     // Mount the EFI image.
     snprintf(command, sizeof(command), "mkdir -p %s", mount_path);
-    run_command(command);
+    if (run_command(command) != 0)
+    {
+        LOG_WARNING("Failed to create EFI mount directory: %s", mount_path);
+    }
 
     snprintf(command, sizeof(command), "mount -o loop %s %s", efi_img_path, mount_path);
     if (run_command(command) != 0)
@@ -155,7 +158,10 @@ static int setup_efi_image(const char *staging_path)
 
     // Create EFI boot directory.
     snprintf(command, sizeof(command), "mkdir -p %s/EFI/BOOT", mount_path);
-    run_command(command);
+    if (run_command(command) != 0)
+    {
+        LOG_WARNING("Failed to create EFI boot directory");
+    }
 
     // Copy GRUB EFI binary.
     snprintf(
@@ -176,17 +182,26 @@ static int setup_efi_image(const char *staging_path)
         {
             LOG_ERROR("Failed to create GRUB EFI image");
             snprintf(command, sizeof(command), "umount %s", mount_path);
-            run_command(command);
+            if (run_command(command) != 0)
+            {
+                LOG_WARNING("Failed to unmount EFI image on error: %s", mount_path);
+            }
             return -1;
         }
     }
 
     // Unmount and clean up.
     snprintf(command, sizeof(command), "umount %s", mount_path);
-    run_command(command);
+    if (run_command(command) != 0)
+    {
+        LOG_WARNING("Failed to unmount EFI image: %s", mount_path);
+    }
 
     snprintf(command, sizeof(command), "rmdir %s", mount_path);
-    run_command(command);
+    if (run_command(command) != 0)
+    {
+        LOG_WARNING("Failed to remove EFI mount directory: %s", mount_path);
+    }
 
     return 0;
 }
