@@ -131,9 +131,9 @@ static int setup_efi_image(const char *staging_path)
     char quoted_efi_img[COMMAND_QUOTED_MAX_LENGTH];
     char quoted_mount[COMMAND_QUOTED_MAX_LENGTH];
 
+    // Prepare paths for EFI image and mount point.
     snprintf(efi_img_path, sizeof(efi_img_path), "%s/boot/grub/efiboot.img", staging_path);
     snprintf(mount_path, sizeof(mount_path), "%s/efi_mount", staging_path);
-
     if (shell_quote_path(efi_img_path, quoted_efi_img, sizeof(quoted_efi_img)) != 0)
     {
         LOG_ERROR("Failed to quote EFI image path");
@@ -170,7 +170,6 @@ static int setup_efi_image(const char *staging_path)
     {
         LOG_WARNING("Failed to create EFI mount directory: %s", mount_path);
     }
-
     snprintf(command, sizeof(command), "mount -o loop %s %s", quoted_efi_img, quoted_mount);
     if (run_command(command) != 0)
     {
@@ -192,6 +191,7 @@ static int setup_efi_image(const char *staging_path)
     {
         LOG_WARNING("Failed to copy GRUB EFI binary, trying grub-mkimage");
 
+        // If copying fails, try creating the EFI binary with grub-mkimage.
         char quoted_efi_dst[COMMAND_QUOTED_MAX_LENGTH];
         if (shell_quote_path(efi_binary_dst, quoted_efi_dst, sizeof(quoted_efi_dst)) != 0)
         {
@@ -200,7 +200,6 @@ static int setup_efi_image(const char *staging_path)
             run_command(command);
             return -1;
         }
-
         snprintf(
             command, sizeof(command),
             "grub-mkimage -o %s -p /boot/grub -O x86_64-efi "
@@ -225,7 +224,6 @@ static int setup_efi_image(const char *staging_path)
     {
         LOG_WARNING("Failed to unmount EFI image: %s", mount_path);
     }
-
     snprintf(command, sizeof(command), "rmdir %s", quoted_mount);
     if (run_command(command) != 0)
     {
@@ -238,17 +236,18 @@ static int setup_efi_image(const char *staging_path)
 static int run_xorriso(const char *staging_path, const char *output_path)
 {
     char command[COMMAND_MAX_LENGTH];
-    char quoted_output[COMMAND_QUOTED_MAX_LENGTH];
-    char quoted_staging[COMMAND_QUOTED_MAX_LENGTH];
 
-    if (shell_quote_path(output_path, quoted_output, sizeof(quoted_output)) != 0)
-    {
-        LOG_ERROR("Failed to quote output path");
-        return -1;
-    }
+    // Quote paths to prevent shell injection.
+    char quoted_staging[COMMAND_QUOTED_MAX_LENGTH];
+    char quoted_output[COMMAND_QUOTED_MAX_LENGTH];
     if (shell_quote_path(staging_path, quoted_staging, sizeof(quoted_staging)) != 0)
     {
         LOG_ERROR("Failed to quote staging path");
+        return -1;
+    }
+    if (shell_quote_path(output_path, quoted_output, sizeof(quoted_output)) != 0)
+    {
+        LOG_ERROR("Failed to quote output path");
         return -1;
     }
 

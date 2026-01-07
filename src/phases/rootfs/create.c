@@ -11,6 +11,7 @@ int create_rootfs(const char *path)
 
     LOG_INFO("Creating rootfs at %s", path);
 
+    // Quote the path to prevent shell injection.
     if (shell_quote_path(path, quoted_path, sizeof(quoted_path)) != 0)
     {
         LOG_ERROR("Failed to quote path");
@@ -50,14 +51,12 @@ int create_rootfs(const char *path)
     char kernel_pattern[COMMAND_PATH_MAX_LENGTH];
     char kernel_src[COMMAND_PATH_MAX_LENGTH];
     char kernel_dst[COMMAND_PATH_MAX_LENGTH];
-
     snprintf(kernel_pattern, sizeof(kernel_pattern), "%s/boot/vmlinuz-*", path);
     if (find_first_glob(kernel_pattern, kernel_src, sizeof(kernel_src)) != 0)
     {
         LOG_ERROR("Failed to find kernel");
         return -4;
     }
-
     snprintf(kernel_dst, sizeof(kernel_dst), "%s/boot/vmlinuz", path);
     if (copy_file(kernel_src, kernel_dst) != 0)
     {
@@ -69,14 +68,12 @@ int create_rootfs(const char *path)
     char initrd_pattern[COMMAND_PATH_MAX_LENGTH];
     char initrd_src[COMMAND_PATH_MAX_LENGTH];
     char initrd_dst[COMMAND_PATH_MAX_LENGTH];
-
     snprintf(initrd_pattern, sizeof(initrd_pattern), "%s/boot/initrd.img-*", path);
     if (find_first_glob(initrd_pattern, initrd_src, sizeof(initrd_src)) != 0)
     {
         LOG_ERROR("Failed to find initrd");
         return -5;
     }
-
     snprintf(initrd_dst, sizeof(initrd_dst), "%s/boot/initrd.img", path);
     if (copy_file(initrd_src, initrd_dst) != 0)
     {
