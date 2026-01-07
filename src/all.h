@@ -3,6 +3,8 @@
 #include <curl/curl.h>
 #include <errno.h>
 #include <getopt.h>
+#include <glob.h>
+#include <json-c/json.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>

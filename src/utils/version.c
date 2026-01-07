@@ -2,8 +2,7 @@
  * This code is responsible for semantic version parsing and comparison.
  */
 
-#include "version.h"
-#include <stdlib.h>
+#include "all.h"
 
 const char *skip_version_prefix(const char *version)
 {

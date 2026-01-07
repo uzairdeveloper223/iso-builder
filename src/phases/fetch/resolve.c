@@ -3,7 +3,6 @@
  */
 
 #include "all.h"
-#include <json-c/json.h>
 
 /**
  * The initial buffer size for API response data.

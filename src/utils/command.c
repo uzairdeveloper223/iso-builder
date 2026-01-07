@@ -270,3 +270,25 @@ int write_file(const char *path, const char *content)
     fclose(file);
     return 0;
 }
+
+int find_first_glob(const char *pattern, char *out_path, size_t buffer_length)
+{
+    glob_t glob_result;
+    int ret;
+
+    // Perform glob expansion without sorting results.
+    ret = glob(pattern, GLOB_NOSORT, NULL, &glob_result);
+    if (ret != 0 || glob_result.gl_pathc == 0)
+    {
+        globfree(&glob_result);
+        return -1;
+    }
+
+    // Copy the first matched path to the output buffer.
+    strncpy(out_path, glob_result.gl_pathv[0], buffer_length - 1);
+    out_path[buffer_length - 1] = '\0';
+
+    // Free glob resources.
+    globfree(&glob_result);
+    return 0;
+}

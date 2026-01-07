@@ -3,40 +3,6 @@
  */
 
 #include "all.h"
-#include <glob.h>
-
-/**
- * Finds the first file matching a glob pattern.
- *
- * @param pattern The glob pattern to match.
- * @param out_path The buffer to store the matched path.
- * @param buffer_length The size of the output buffer.
- *
- * @return - `0` - Indicates a match was found.
- * @return - `-1` - Indicates no match was found.
- */
-static int find_first_glob(
-    const char *pattern,
-    char *out_path,
-    size_t buffer_length
-)
-{
-    glob_t glob_result;
-    int ret;
-
-    ret = glob(pattern, GLOB_NOSORT, NULL, &glob_result);
-    if (ret != 0 || glob_result.gl_pathc == 0)
-    {
-        globfree(&glob_result);
-        return -1;
-    }
-
-    strncpy(out_path, glob_result.gl_pathv[0], buffer_length - 1);
-    out_path[buffer_length - 1] = '\0';
-
-    globfree(&glob_result);
-    return 0;
-}
 
 int create_rootfs(const char *path)
 {

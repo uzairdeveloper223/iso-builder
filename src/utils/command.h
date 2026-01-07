@@ -152,3 +152,15 @@ int file_exists(const char *path);
  * @return - `-1` - Indicates failure.
  */
 int write_file(const char *path, const char *content);
+
+/**
+ * Finds the first file matching a glob pattern.
+ *
+ * @param pattern The glob pattern to match.
+ * @param out_path The buffer to store the matched path.
+ * @param buffer_length The size of the output buffer.
+ *
+ * @return - `0` - Indicates a match was found.
+ * @return - `-1` - Indicates no match was found.
+ */
+int find_first_glob(const char *pattern, char *out_path, size_t buffer_length);
