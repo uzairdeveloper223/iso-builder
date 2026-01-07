@@ -175,6 +175,7 @@ static int setup_efi_image(const char *staging_path)
     if (run_command(command) != 0)
     {
         LOG_ERROR("Failed to mount EFI image");
+        rmdir(mount_path);
         return -1;
     }
 
