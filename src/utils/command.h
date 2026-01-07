@@ -1,11 +1,22 @@
 #pragma once
 #include "../all.h"
 
-/** The maximum length for file path strings. */
-#define COMMAND_PATH_MAX_LENGTH 256
+/**
+ * The maximum length for file path strings.
+ *
+ * Set to 4096 to match PATH_MAX on Linux systems, preventing buffer overflows
+ * when constructing paths with deeply nested directories.
+ */
+#define COMMAND_PATH_MAX_LENGTH 4096
 
-/** The maximum length for constructed shell command strings. */
-#define COMMAND_MAX_LENGTH 512
+/**
+ * The maximum length for constructed shell command strings.
+ *
+ * Calculated as 4 * COMMAND_PATH_MAX_LENGTH to accommodate a command with
+ * one fully-quoted path (which can expand up to 4x due to shell escaping)
+ * plus command name and arguments.
+ */
+#define COMMAND_MAX_LENGTH (4 * COMMAND_PATH_MAX_LENGTH)
 
 /**
  * The maximum length for a shell-quoted string.
