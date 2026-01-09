@@ -25,11 +25,10 @@ static int create_squashfs(const char *rootfs_path, const char *staging_path)
     char squashfs_path[COMMAND_PATH_MAX_LENGTH];
     char quoted_squashfs[COMMAND_QUOTED_MAX_LENGTH];
 
-    // Use xz compression for best compression ratio on live filesystem.
     LOG_INFO("Creating squashfs filesystem...");
 
+    // Prepare paths and quote them to prevent shell injection.
     snprintf(squashfs_path, sizeof(squashfs_path), "%s/live/filesystem.squashfs", staging_path);
-
     if (shell_quote_path(rootfs_path, quoted_rootfs, sizeof(quoted_rootfs)) != 0)
     {
         LOG_ERROR("Failed to quote rootfs path");
@@ -41,14 +40,15 @@ static int create_squashfs(const char *rootfs_path, const char *staging_path)
         return -1;
     }
 
+    // Create the squashfs filesystem.
     snprintf(
         command, sizeof(command),
-        "mksquashfs %s %s -comp xz -noappend",
+        "mksquashfs %s %s -comp " CONFIG_SQUASHFS_COMPRESSION " -noappend",
         quoted_rootfs, quoted_squashfs
     );
     if (run_command(command) != 0)
     {
-        LOG_ERROR("Failed to create squashfs");
+        LOG_ERROR("Failed to create squashfs from %s", rootfs_path);
         return -1;
     }
 
@@ -90,7 +90,6 @@ static int copy_boot_files(const char *rootfs_path, const char *staging_path)
     char command[COMMAND_MAX_LENGTH];
     char quoted_src[COMMAND_QUOTED_MAX_LENGTH];
     char quoted_dst[COMMAND_QUOTED_MAX_LENGTH];
-
     snprintf(src_path, sizeof(src_path), "%s/isolinux", rootfs_path);
     if (shell_quote_path(src_path, quoted_src, sizeof(quoted_src)) != 0)
     {
@@ -105,7 +104,7 @@ static int copy_boot_files(const char *rootfs_path, const char *staging_path)
     snprintf(command, sizeof(command), "cp -r %s %s/", quoted_src, quoted_dst);
     if (run_command(command) != 0)
     {
-        LOG_ERROR("Failed to copy isolinux");
+        LOG_ERROR("Failed to copy isolinux from %s to %s", src_path, staging_path);
         return -1;
     }
 
@@ -153,15 +152,15 @@ static int setup_efi_image(const char *staging_path)
     );
     if (run_command(command) != 0)
     {
-        LOG_ERROR("Failed to create EFI image");
+        LOG_ERROR("Failed to create EFI image: %s", efi_img_path);
         return -1;
     }
 
-    // Format as FAT12, appropriate for small (<16MB) EFI system partitions.
-    snprintf(command, sizeof(command), "mkfs.fat -F 12 %s", quoted_efi_img);
+    // Format as FAT, appropriate for small EFI system partitions.
+    snprintf(command, sizeof(command), "mkfs.fat -F %d %s", CONFIG_EFI_FAT_TYPE, quoted_efi_img);
     if (run_command(command) != 0)
     {
-        LOG_ERROR("Failed to format EFI image");
+        LOG_ERROR("Failed to format EFI image: %s", efi_img_path);
         return -1;
     }
 
@@ -173,7 +172,7 @@ static int setup_efi_image(const char *staging_path)
     snprintf(command, sizeof(command), "mount -o loop %s %s", quoted_efi_img, quoted_mount);
     if (run_command(command) != 0)
     {
-        LOG_ERROR("Failed to mount EFI image");
+        LOG_ERROR("Failed to mount EFI image %s at %s", efi_img_path, mount_path);
         rmdir(mount_path);
         return -1;
     }
@@ -208,7 +207,7 @@ static int setup_efi_image(const char *staging_path)
         );
         if (run_command(command) != 0)
         {
-            LOG_ERROR("Failed to create GRUB EFI image");
+            LOG_ERROR("Failed to create GRUB EFI image at %s", efi_binary_dst);
             snprintf(command, sizeof(command), "umount %s", quoted_mount);
             if (run_command(command) != 0)
             {
@@ -272,7 +271,7 @@ static int run_xorriso(const char *staging_path, const char *output_path)
     );
     if (run_command(command) != 0)
     {
-        LOG_ERROR("Failed to create ISO image");
+        LOG_ERROR("Failed to create ISO image: %s", output_path);
         return -1;
     }
 
@@ -281,9 +280,10 @@ static int run_xorriso(const char *staging_path, const char *output_path)
 
 static void cleanup_staging(const char *staging_path)
 {
-    // Retry cleanup up to 3 times with a short delay between attempts.
+    // Retry cleanup up to 3 times.
     for (int attempt = 1; attempt <= 3; attempt++)
     {
+        // Attempt to remove the staging directory.
         if (rm_rf(staging_path) == 0)
         {
             return;

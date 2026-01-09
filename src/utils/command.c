@@ -344,7 +344,7 @@ int find_first_glob(const char *pattern, char *out_path, size_t buffer_length)
 int create_secure_tmpdir(char *out_path, size_t buffer_length)
 {
     // Template for mkdtemp - X's will be replaced with unique characters.
-    char template[] = "/tmp/limeos-build-XXXXXX";
+    char template[] = CONFIG_TMPDIR_PREFIX "XXXXXX";
 
     // Validate buffer size.
     if (buffer_length < sizeof(template))
@@ -366,5 +366,77 @@ int create_secure_tmpdir(char *out_path, size_t buffer_length)
     out_path[buffer_length - 1] = '\0';
 
     LOG_INFO("Created secure build directory: %s", out_path);
+    return 0;
+}
+
+int cleanup_apt_directories(const char *rootfs_path)
+{
+    char dir_path[COMMAND_PATH_MAX_LENGTH];
+
+    // Remove apt cache.
+    snprintf(dir_path, sizeof(dir_path), "%s/var/cache/apt", rootfs_path);
+    if (rm_rf(dir_path) != 0)
+    {
+        LOG_ERROR("Failed to remove apt cache");
+        return -1;
+    }
+
+    // Recreate apt cache directory.
+    if (mkdir_p(dir_path) != 0)
+    {
+        LOG_WARNING("Failed to recreate apt cache directory");
+    }
+
+    // Remove apt lists.
+    snprintf(dir_path, sizeof(dir_path), "%s/var/lib/apt/lists", rootfs_path);
+    if (rm_rf(dir_path) != 0)
+    {
+        LOG_ERROR("Failed to remove apt lists");
+        return -2;
+    }
+
+    // Recreate apt lists directory.
+    if (mkdir_p(dir_path) != 0)
+    {
+        LOG_WARNING("Failed to recreate apt lists directory");
+    }
+
+    return 0;
+}
+
+int copy_kernel_and_initrd(const char *rootfs_path)
+{
+    char pattern[COMMAND_PATH_MAX_LENGTH];
+    char src[COMMAND_PATH_MAX_LENGTH];
+    char dst[COMMAND_PATH_MAX_LENGTH];
+
+    // Copy kernel to standard path.
+    snprintf(pattern, sizeof(pattern), "%s/boot/vmlinuz-*", rootfs_path);
+    if (find_first_glob(pattern, src, sizeof(src)) != 0)
+    {
+        LOG_ERROR("Failed to find kernel");
+        return -1;
+    }
+    snprintf(dst, sizeof(dst), "%s/boot/vmlinuz", rootfs_path);
+    if (copy_file(src, dst) != 0)
+    {
+        LOG_ERROR("Failed to copy kernel");
+        return -1;
+    }
+
+    // Copy initrd to standard path.
+    snprintf(pattern, sizeof(pattern), "%s/boot/initrd.img-*", rootfs_path);
+    if (find_first_glob(pattern, src, sizeof(src)) != 0)
+    {
+        LOG_ERROR("Failed to find initrd");
+        return -2;
+    }
+    snprintf(dst, sizeof(dst), "%s/boot/initrd.img", rootfs_path);
+    if (copy_file(src, dst) != 0)
+    {
+        LOG_ERROR("Failed to copy initrd");
+        return -2;
+    }
+
     return 0;
 }

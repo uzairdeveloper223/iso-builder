@@ -1,15 +1,16 @@
 /**
- * This code is responsible for stripping unnecessary files from the rootfs.
+ * This code is responsible for aggressively stripping unnecessary files
+ * from the carrier rootfs to minimize ISO size.
  */
 
 #include "all.h"
 
-int strip_rootfs(const char *path)
+int strip_carrier_rootfs(const char *path)
 {
     char dir_path[COMMAND_PATH_MAX_LENGTH];
 
     // Log the start of rootfs stripping.
-    LOG_INFO("Stripping rootfs at %s", path);
+    LOG_INFO("Stripping carrier rootfs at %s", path);
 
     // Remove documentation files.
     snprintf(dir_path, sizeof(dir_path), "%s/usr/share/doc", path);
@@ -51,35 +52,13 @@ int strip_rootfs(const char *path)
         return -2;
     }
 
-    // Remove apt cache.
-    snprintf(dir_path, sizeof(dir_path), "%s/var/cache/apt", path);
-    if (rm_rf(dir_path) != 0)
+    // Remove apt cache and lists.
+    if (cleanup_apt_directories(path) != 0)
     {
-        LOG_ERROR("Failed to remove apt cache");
         return -3;
     }
 
-    // Recreate apt cache directory.
-    if (mkdir_p(dir_path) != 0)
-    {
-        LOG_WARNING("Failed to recreate apt cache directory");
-    }
-
-    // Remove apt lists.
-    snprintf(dir_path, sizeof(dir_path), "%s/var/lib/apt/lists", path);
-    if (rm_rf(dir_path) != 0)
-    {
-        LOG_ERROR("Failed to remove apt lists");
-        return -4;
-    }
-
-    // Recreate apt lists directory.
-    if (mkdir_p(dir_path) != 0)
-    {
-        LOG_WARNING("Failed to recreate apt lists directory");
-    }
-
-    LOG_INFO("Rootfs stripped successfully");
+    LOG_INFO("Carrier rootfs stripped successfully");
 
     return 0;
 }
