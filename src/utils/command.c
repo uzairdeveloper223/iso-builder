@@ -72,9 +72,48 @@ int shell_quote_path(const char *path, char *out_quoted, size_t buffer_length)
     return shell_quote(path, out_quoted, buffer_length);
 }
 
+/** The maximum length for a single line of command output. */
+#define COMMAND_OUTPUT_LINE_MAX 4096
+
+/** ANSI escape code for gray (bright black) text. */
+#define ANSI_GRAY "\033[90m"
+
+/** ANSI escape code to reset text formatting. */
+#define ANSI_RESET "\033[0m"
+
 int run_command(const char *command)
 {
-    return system(command);
+    char line[COMMAND_OUTPUT_LINE_MAX];
+    char full_command[COMMAND_MAX_LENGTH];
+    FILE *pipe;
+    int status;
+
+    // Redirect stderr to stdout so we capture all output.
+    snprintf(full_command, sizeof(full_command), "%s 2>&1", command);
+
+    // Open a pipe to capture command output.
+    pipe = popen(full_command, "r");
+    if (pipe == NULL)
+    {
+        return -1;
+    }
+
+    // Print each line with gray color and gutter bar.
+    while (fgets(line, sizeof(line), pipe) != NULL)
+    {
+        printf(ANSI_GRAY "  | %s" ANSI_RESET, line);
+        fflush(stdout);
+    }
+
+    // Close the pipe and extract the exit status.
+    status = pclose(pipe);
+    if (status == -1)
+    {
+        return -1;
+    }
+
+    // Return the command's exit code.
+    return WEXITSTATUS(status);
 }
 
 int run_chroot(const char *rootfs_path, const char *command)
