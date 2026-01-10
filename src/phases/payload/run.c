@@ -4,9 +4,12 @@
 
 #include "all.h"
 
-int run_payload_phase(const char *rootfs_dir, const char *tarball_path, const char *version)
+int run_payload_phase(
+    const char *base_rootfs_dir, const char *rootfs_dir,
+    const char *tarball_path, const char *version
+)
 {
-    if (create_payload_rootfs(rootfs_dir) != 0)
+    if (create_payload_rootfs(base_rootfs_dir, rootfs_dir) != 0)
     {
         LOG_ERROR("Failed to create payload rootfs");
         return -1;
@@ -18,9 +21,13 @@ int run_payload_phase(const char *rootfs_dir, const char *tarball_path, const ch
         return -1;
     }
 
-    if (strip_payload_rootfs(rootfs_dir) != 0)
+    // Remove firmware that may have been reinstalled by linux-image package.
+    cleanup_unnecessary_firmware(rootfs_dir);
+
+    // Clean up apt cache after all packages are installed.
+    if (cleanup_apt_directories(rootfs_dir) != 0)
     {
-        LOG_ERROR("Failed to strip payload rootfs");
+        LOG_ERROR("Failed to cleanup apt directories");
         return -1;
     }
 
@@ -31,6 +38,6 @@ int run_payload_phase(const char *rootfs_dir, const char *tarball_path, const ch
     }
 
     rm_rf(rootfs_dir);
-    LOG_INFO("Phase 2A complete: Payload rootfs packaged");
+    LOG_INFO("Phase 3 complete: Payload rootfs packaged");
     return 0;
 }

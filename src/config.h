@@ -156,7 +156,8 @@
  * The boot-mode-specific packages are bundled separately.
  */
 #define CONFIG_PAYLOAD_PACKAGES \
-    "linux-image-amd64 systemd-sysv " \
+    "linux-image-amd64 systemd-sysv dbus " \
+    "libpam-systemd policykit-1 " \
     "locales console-setup keyboard-configuration " \
     "sudo network-manager " \
     "grub2-common grub-common ucf sensible-utils " \

@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     const char *version = NULL;
     char build_dir[COMMAND_PATH_MAX_LENGTH];
     char components_dir[COMMAND_PATH_MAX_LENGTH];
+    char base_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
     char payload_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
     char payload_tarball_path[COMMAND_PATH_MAX_LENGTH];
     char carrier_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
@@ -87,6 +88,7 @@ int main(int argc, char *argv[])
 
     // Construct derived paths.
     snprintf(components_dir, sizeof(components_dir), "%s/components", build_dir);
+    snprintf(base_rootfs_dir, sizeof(base_rootfs_dir), "%s/base-rootfs", build_dir);
     snprintf(payload_rootfs_dir, sizeof(payload_rootfs_dir), "%s/payload-rootfs", build_dir);
     snprintf(payload_tarball_path, sizeof(payload_tarball_path), "%s/rootfs.tar.gz", build_dir);
     snprintf(carrier_rootfs_dir, sizeof(carrier_rootfs_dir), "%s/carrier-rootfs", build_dir);
@@ -101,23 +103,34 @@ int main(int argc, char *argv[])
     }
     if (check_interrupted()) return 130;
 
-    // Phase 2: Payload - create and package the target rootfs.
-    if (run_payload_phase(payload_rootfs_dir, payload_tarball_path, version) != 0)
+    // Phase 2: Base - create and strip base rootfs.
+    if (run_base_phase(base_rootfs_dir) != 0)
     {
         exit_code = 1;
         goto cleanup;
     }
     if (check_interrupted()) return 130;
 
-    // Phase 3: Carrier - create live rootfs with embedded payload.
-    if (run_carrier_phase(carrier_rootfs_dir, payload_tarball_path, components_dir) != 0)
+    // Phase 3: Payload - copy base, install packages, brand, package.
+    if (run_payload_phase(base_rootfs_dir, payload_rootfs_dir, payload_tarball_path, version) != 0)
     {
         exit_code = 1;
         goto cleanup;
     }
     if (check_interrupted()) return 130;
 
-    // Phase 4: Assembly - configure bootloaders and create ISO.
+    // Phase 4: Carrier - copy base, install packages, embed payload.
+    if (run_carrier_phase(base_rootfs_dir, carrier_rootfs_dir, payload_tarball_path, components_dir) != 0)
+    {
+        exit_code = 1;
+        goto cleanup;
+    }
+    if (check_interrupted()) return 130;
+
+    // Base rootfs no longer needed after payload and carrier are created.
+    rm_rf(base_rootfs_dir);
+
+    // Phase 5: Assembly - configure bootloaders and create ISO.
     if (run_assembly_phase(carrier_rootfs_dir, version) != 0)
     {
         exit_code = 1;

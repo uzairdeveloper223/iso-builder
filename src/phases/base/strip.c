@@ -1,16 +1,15 @@
 /**
  * This code is responsible for aggressively stripping unnecessary files
- * from the carrier rootfs to minimize ISO size.
+ * from the base rootfs to minimize size for both payload and carrier.
  */
 
 #include "all.h"
 
-int strip_carrier_rootfs(const char *path)
+int strip_base_rootfs(const char *path)
 {
     char dir_path[COMMAND_PATH_MAX_LENGTH];
 
-    // Log the start of rootfs stripping.
-    LOG_INFO("Stripping carrier rootfs at %s", path);
+    LOG_INFO("Stripping base rootfs at %s", path);
 
     // Remove documentation files.
     snprintf(dir_path, sizeof(dir_path), "%s/usr/share/doc", path);
@@ -52,13 +51,19 @@ int strip_carrier_rootfs(const char *path)
         return -2;
     }
 
-    // Remove apt cache and lists.
-    if (cleanup_apt_directories(path) != 0)
-    {
-        return -3;
-    }
+    // Remove unnecessary firmware while keeping GPU and CPU microcode.
+    cleanup_unnecessary_firmware(path);
 
-    LOG_INFO("Carrier rootfs stripped successfully");
+    // Blacklist kernel modules for removed firmware so they don't try to load.
+    blacklist_wireless_modules(path);
+
+    // Mask rfkill service since there's no RF hardware to manage.
+    mask_rfkill_service(path);
+
+    // NOTE: Do NOT cleanup apt directories here. The payload and carrier
+    // phases need apt to install packages after copying from base.
+
+    LOG_INFO("Base rootfs stripped successfully");
 
     return 0;
 }

@@ -218,3 +218,33 @@ int cleanup_apt_directories(const char *rootfs_path);
  * @return - `-2` - Indicates initrd copy failure.
  */
 int copy_kernel_and_initrd(const char *rootfs_path);
+
+/**
+ * Removes unnecessary firmware from a rootfs.
+ *
+ * Removes WiFi, Bluetooth, server NIC, and audio DSP firmware while
+ * preserving GPU firmware (for Plymouth) and CPU microcode (for stability).
+ *
+ * @param rootfs_path The path to the rootfs directory.
+ */
+void cleanup_unnecessary_firmware(const char *rootfs_path);
+
+/**
+ * Blacklists wireless and bluetooth kernel modules.
+ *
+ * Creates /etc/modprobe.d/blacklist-wireless.conf to prevent modules from
+ * loading and looking for firmware that was removed.
+ *
+ * @param rootfs_path The path to the rootfs directory.
+ */
+void blacklist_wireless_modules(const char *rootfs_path);
+
+/**
+ * Masks the systemd-rfkill service.
+ *
+ * Since wireless/bluetooth hardware is disabled, rfkill has nothing to
+ * manage and would fail on boot.
+ *
+ * @param rootfs_path The path to the rootfs directory.
+ */
+void mask_rfkill_service(const char *rootfs_path);

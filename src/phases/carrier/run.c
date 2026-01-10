@@ -5,12 +5,13 @@
 #include "all.h"
 
 int run_carrier_phase(
+    const char *base_rootfs_dir,
     const char *rootfs_dir,
     const char *tarball_path,
     const char *components_dir
 )
 {
-    if (create_carrier_rootfs(rootfs_dir) != 0)
+    if (create_carrier_rootfs(base_rootfs_dir, rootfs_dir) != 0)
     {
         LOG_ERROR("Failed to create carrier rootfs");
         return -1;
@@ -40,12 +41,13 @@ int run_carrier_phase(
         return -1;
     }
 
-    if (strip_carrier_rootfs(rootfs_dir) != 0)
+    // Clean up apt cache after all packages are installed.
+    if (cleanup_apt_directories(rootfs_dir) != 0)
     {
-        LOG_ERROR("Failed to strip carrier rootfs");
+        LOG_ERROR("Failed to cleanup apt directories");
         return -1;
     }
 
-    LOG_INFO("Phase 2B complete: Carrier rootfs created");
+    LOG_INFO("Phase 4 complete: Carrier rootfs created");
     return 0;
 }
