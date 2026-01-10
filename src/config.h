@@ -100,6 +100,22 @@
 #define CONFIG_PLYMOUTH_THEMES_DIR "/usr/share/plymouth/themes"
 
 // ---
+// OS Branding Configuration
+// ---
+
+/** The display name of the operating system. */
+#define CONFIG_OS_NAME "LimeOS"
+
+/** The lowercase identifier for the operating system. */
+#define CONFIG_OS_ID "limeos"
+
+/** The OS home page URL. */
+#define CONFIG_OS_HOME_URL "https://limeos.org"
+
+/** The ID of the upstream distribution this OS is based on. */
+#define CONFIG_OS_BASE_ID "debian"
+
+// ---
 // Root Filesystem Configuration
 // ---
 

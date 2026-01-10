@@ -4,11 +4,17 @@
 
 #include "all.h"
 
-int run_payload_phase(const char *rootfs_dir, const char *tarball_path)
+int run_payload_phase(const char *rootfs_dir, const char *tarball_path, const char *version)
 {
     if (create_payload_rootfs(rootfs_dir) != 0)
     {
         LOG_ERROR("Failed to create payload rootfs");
+        return -1;
+    }
+
+    if (brand_payload_rootfs(rootfs_dir, version) != 0)
+    {
+        LOG_ERROR("Failed to brand payload rootfs");
         return -1;
     }
 

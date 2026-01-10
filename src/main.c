@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     if (check_interrupted()) return 130;
 
     // Phase 2: Payload - create and package the target rootfs.
-    if (run_payload_phase(payload_rootfs_dir, payload_tarball_path) != 0)
+    if (run_payload_phase(payload_rootfs_dir, payload_tarball_path, version) != 0)
     {
         exit_code = 1;
         goto cleanup;

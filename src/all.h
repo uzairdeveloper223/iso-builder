@@ -22,6 +22,7 @@
 #include "phases/preparation/download.h"
 #include "phases/preparation/run.h"
 #include "phases/payload/create.h"
+#include "phases/payload/brand.h"
 #include "phases/payload/strip.h"
 #include "phases/payload/package.h"
 #include "phases/payload/run.h"
