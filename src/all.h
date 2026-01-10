@@ -26,6 +26,7 @@
 #include "phases/base/run.h"
 #include "phases/payload/create.h"
 #include "phases/payload/brand.h"
+#include "phases/payload/setup.h"
 #include "phases/payload/package.h"
 #include "phases/payload/run.h"
 #include "phases/carrier/create.h"
