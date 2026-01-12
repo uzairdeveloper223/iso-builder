@@ -38,7 +38,6 @@
 #include "phases/base/base.h"
 #include "phases/target/create.h"
 #include "phases/target/brand.h"
-#include "phases/target/setup.h"
 #include "phases/target/package.h"
 #include "phases/target/target.h"
 #include "phases/carrier/create.h"

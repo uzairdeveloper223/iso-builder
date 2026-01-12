@@ -21,12 +21,6 @@ int run_target_phase(
         return -1;
     }
 
-    if (create_default_user(rootfs_dir) != 0)
-    {
-        LOG_ERROR("Failed to create default user");
-        return -1;
-    }
-
     // Remove firmware that may have been reinstalled by linux-image package.
     cleanup_unnecessary_firmware(rootfs_dir);
 
