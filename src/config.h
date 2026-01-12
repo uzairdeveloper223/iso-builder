@@ -208,6 +208,18 @@ static const Component CONFIG_OPTIONAL_COMPONENTS[] = {
     (int)(sizeof(CONFIG_OPTIONAL_COMPONENTS) / sizeof(CONFIG_OPTIONAL_COMPONENTS[0]))
 
 // ---
+// Cache Configuration
+// ---
+
+/**
+ * The cache version number.
+ *
+ * Increment this to invalidate all existing caches when the base rootfs
+ * creation or stripping logic changes in a way that affects the output.
+ */
+#define CONFIG_CACHE_VERSION 1
+
+// ---
 // Service Configuration
 // ---
 

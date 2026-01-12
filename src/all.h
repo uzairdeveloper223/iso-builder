@@ -34,6 +34,7 @@
 #include "phases/preparation/preparation.h"
 #include "phases/base/create.h"
 #include "phases/base/strip.h"
+#include "phases/base/cache.h"
 #include "phases/base/base.h"
 #include "phases/target/create.h"
 #include "phases/target/brand.h"

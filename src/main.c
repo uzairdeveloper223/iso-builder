@@ -14,6 +14,7 @@ static void print_usage(const char *program_name)
     printf("\n");
     printf("Options:\n");
     printf("  --help          Show this help message\n");
+    printf("  --no-cache      Disable rootfs caching\n");
 }
 
 int main(int argc, char *argv[])
@@ -26,6 +27,7 @@ int main(int argc, char *argv[])
     char target_tarball_path[COMMAND_PATH_MAX_LENGTH];
     char carrier_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
     int exit_code = 0;
+    int use_cache = 1;
 
     // Verify the program is running as root.
     if (geteuid() != 0)
@@ -45,15 +47,19 @@ int main(int argc, char *argv[])
     int option;
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
+        {"no-cache", no_argument, 0, 'n'},
         {0, 0, 0, 0}
     };
-    while ((option = getopt_long(argc, argv, "h", long_options, NULL)) != -1)
+    while ((option = getopt_long(argc, argv, "hn", long_options, NULL)) != -1)
     {
         switch (option)
         {
             case 'h':
                 print_usage(argv[0]);
                 return 0;
+            case 'n':
+                use_cache = 0;
+                break;
             default:
                 print_usage(argv[0]);
                 return 1;
@@ -104,7 +110,7 @@ int main(int argc, char *argv[])
     if (check_interrupted()) return 130;
 
     // Phase 2: Base - create and strip base rootfs.
-    if (run_base_phase(base_rootfs_dir) != 0)
+    if (run_base_phase(base_rootfs_dir, use_cache) != 0)
     {
         exit_code = 1;
         goto cleanup;
