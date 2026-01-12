@@ -20,6 +20,7 @@ section listed first will take precedence.
 
 - [Building the ISO builder](#building-the-iso-builder)
 - [Running the ISO builder](#running-the-iso-builder)
+- [Understanding the build flow](#understanding-the-build-flow)
 
 **General Contributing Guidelines**
 
@@ -153,6 +154,65 @@ If you want to use local LimeOS component binaries (e.g.,
 `limeos-installation-wizard`) instead of having the ISO builder download them,
 place them in `./bin`. The ISO builder will automatically detect and prefer them
 over downloads, as long as the filenames match the expected names.
+
+### Understanding the build flow
+
+This subsection explains the phases the ISO builder executes to produce a
+bootable ISO image.
+
+The build process consists of five sequential phases:
+
+1. **Preparation** - Fetches LimeOS component binaries from GitHub releases
+   (e.g., the installation wizard). If local binaries exist in `./bin`, they are
+   used instead.
+
+2. **Base** - Creates a minimal Debian rootfs using `debootstrap`, then strips
+   unnecessary files (documentation, non-English locales, unused firmware). This
+   base rootfs serves as the foundation for both the target and carrier systems.
+
+3. **Target** - Responsible for creating the system that will eventually be
+   installed on the user's system for day-to-day use. Copies the base rootfs,
+   installs target-specific packages, applies LimeOS branding, creates a default
+   user, and packages the result as a tarball.
+
+4. **Carrier** - Responsible for creating the live system used for installation.
+   Copies the base rootfs, installs carrier-specific packages, applies LimeOS
+   branding, embeds the target tarball, installs LimeOS components, configures
+   the installer to auto-start, and bundles boot-mode-specific packages
+   (GRUB for BIOS/EFI).
+
+5. **Assembly** - Configures ISOLINUX (BIOS boot) and GRUB (EFI boot), creates
+   a squashfs of the carrier rootfs, and assembles the final hybrid ISO image.
+
+```
+┌─────────────┐
+│ Preparation │  Download or load all LimeOS applications.
+└──────┬──────┘
+       │
+       ▼
+┌─────────────┐
+│    Base     │  Create minimal Debian rootfs and strip it down.
+└──────┬──────┘
+       │
+   ┌───┴──────┐
+   │          │
+   ▼          ▼
+┌──────┐ ┌─────────┐
+│Target│ │ Carrier │  Add packages, apply LimeOS branding.
+└──┬───┘ └────┬────┘
+   │          │
+   │      ┌───┘
+   │      │  Target rootfs tarball gets embedded into carrier.
+   │      ▼
+   │ ┌─────────┐
+   └─│ Carrier │
+     └────┬────┘
+          │
+          ▼
+   ┌──────────────┐
+   │   Assembly   │  Configure bootloaders, create squashfs, build ISO
+   └──────────────┘
+```
 
 &nbsp;
 
