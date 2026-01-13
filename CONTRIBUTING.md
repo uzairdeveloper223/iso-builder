@@ -69,6 +69,7 @@ sudo apt install \
    make \
    libcurl4-openssl-dev \
    libjson-c-dev \
+   libcmocka-dev \
    libssl-dev
 ```
 
@@ -80,6 +81,7 @@ dpkg -s \
    make \
    libcurl4-openssl-dev \
    libjson-c-dev \
+   libcmocka-dev \
    libssl-dev >/dev/null 2>&1 && echo "OK"
 ```
 
@@ -102,10 +104,7 @@ Finally, verify the build succeeded by checking that the executable exists at
 
 This subsection explains how to run the ISO builder after building it.
 
-First, ensure the required commands are available on your system: `debootstrap`,
-`mkdir`, `cp`, `rm`, `ln`, `find`, and `chmod`. These are typically
-pre-installed on most Linux distributions. Install the following packages for
-rootfs creation, boot loader configuration, and ISO assembly:
+First, ensure the required commands are available on your system.
 
 ```bash
 sudo apt install \
@@ -114,7 +113,6 @@ sudo apt install \
    syslinux-common \
    xorriso \
    grub-efi-amd64-bin \
-   mtools \
    dosfstools \
    squashfs-tools
 ```
@@ -128,7 +126,6 @@ dpkg -s \
    syslinux-common \
    xorriso \
    grub-efi-amd64-bin \
-   mtools \
    dosfstools \
    squashfs-tools >/dev/null 2>&1 && echo "OK"
 ```
