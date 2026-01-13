@@ -1,9 +1,8 @@
 /**
- * This code is responsible for testing the base rootfs caching functions,
- * including cache key computation and cache directory resolution.
+ * Tests for the shared cache directory resolution.
  */
 
-#include "../../../all.h"
+#include "../../all.h"
 
 /** Sets up the test environment before each test. */
 static int setup(void **state)
@@ -17,33 +16,6 @@ static int teardown(void **state)
 {
     (void)state;
     return 0;
-}
-
-/** Verifies compute_cache_key() produces a 64-character hex string. */
-static void test_compute_cache_key_length(void **state)
-{
-    (void)state;
-    char key[65];
-
-    // Compute the cache key.
-    int result = compute_cache_key(key, sizeof(key));
-
-    // Verify success and correct length.
-    assert_int_equal(0, result);
-    assert_int_equal(64, (int)strlen(key));
-}
-
-/** Verifies compute_cache_key() fails with buffer too small. */
-static void test_compute_cache_key_buffer_too_small(void **state)
-{
-    (void)state;
-    char key[32];
-
-    // Attempt to compute with insufficient buffer.
-    int result = compute_cache_key(key, sizeof(key));
-
-    // Verify failure.
-    assert_int_equal(-1, result);
 }
 
 /** Verifies get_cache_dir() uses XDG_CACHE_HOME when set. */
@@ -75,7 +47,7 @@ static void test_get_cache_dir_xdg(void **state)
 
     // Verify the result uses XDG path.
     assert_int_equal(0, result);
-    assert_string_equal("/custom/cache/limeos", path);
+    assert_string_equal("/custom/cache/limeos-iso-builder", path);
 }
 
 /** Verifies get_cache_dir() falls back to HOME/.cache when XDG not set. */
@@ -111,7 +83,7 @@ static void test_get_cache_dir_home_fallback(void **state)
 
     // Verify the result uses HOME fallback.
     assert_int_equal(0, result);
-    assert_string_equal("/home/testuser/.cache/limeos", path);
+    assert_string_equal("/home/testuser/.cache/limeos-iso-builder", path);
 }
 
 /** Verifies get_cache_dir() ignores empty XDG_CACHE_HOME. */
@@ -151,16 +123,12 @@ static void test_get_cache_dir_empty_xdg(void **state)
 
     // Verify the result falls back to HOME.
     assert_int_equal(0, result);
-    assert_string_equal("/home/testuser/.cache/limeos", path);
+    assert_string_equal("/home/testuser/.cache/limeos-iso-builder", path);
 }
 
 int main(void)
 {
     const struct CMUnitTest tests[] = {
-        // compute_cache_key tests.
-        cmocka_unit_test_setup_teardown(test_compute_cache_key_length, setup, teardown),
-        cmocka_unit_test_setup_teardown(test_compute_cache_key_buffer_too_small, setup, teardown),
-        // get_cache_dir tests.
         cmocka_unit_test_setup_teardown(test_get_cache_dir_xdg, setup, teardown),
         cmocka_unit_test_setup_teardown(test_get_cache_dir_home_fallback, setup, teardown),
         cmocka_unit_test_setup_teardown(test_get_cache_dir_empty_xdg, setup, teardown),

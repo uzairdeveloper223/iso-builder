@@ -156,9 +156,17 @@ If you want to use local LimeOS component binaries (e.g.,
 place them in `./bin`. The ISO builder will automatically detect and prefer them
 over downloads, as long as the filenames match the expected names.
 
-The ISO builder caches the base rootfs at `~/.cache/limeos/` to speed up
-subsequent builds. To force a fresh build without using the cache, use the
-`--no-cache` flag.
+The ISO builder uses caching to speed up subsequent builds:
+
+- **Base rootfs cache**: `/root/.cache/limeos-iso-builder/base-rootfs.tar.gz`
+- **APT cache**: `/root/.cache/limeos-iso-builder/packages/apt/`
+- **Bootloader cache**: `/root/.cache/limeos-iso-builder/packages/` + `/bios/` & `/efi/`
+
+The base rootfs cache stores the stripped Debian rootfs tarball. The APT cache
+is bind-mounted into the chroot during package installation. The bootloader
+cache stores GRUB `.deb` packages for BIOS and EFI boot modes.
+
+To force a fresh build without using any cache, use the `--no-cache` flag.
 
 ### Testing the ISO builder
 
