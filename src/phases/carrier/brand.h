@@ -3,7 +3,8 @@
 /**
  * Applies carrier-specific branding to the rootfs.
  *
- * Calls shared branding functions for OS identity and Plymouth splash.
+ * Calls shared branding functions for OS identity, Plymouth splash, and
+ * GRUB config. Plymouth regenerates initramfs to embed the theme.
  *
  * @param path The path to the carrier rootfs directory.
  * @param version The version string for the OS (e.g., "1.0.0").

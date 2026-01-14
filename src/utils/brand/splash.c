@@ -1,5 +1,9 @@
 /**
- * This code configures the Plymouth boot splash screen.
+ * Configures the Plymouth boot splash screen.
+ *
+ * Creates theme files, sets the default theme, and regenerates initramfs
+ * to embed the theme. The updated initrd is copied to the generic name
+ * so the bootloader can find it.
  */
 
 #include "all.h"
@@ -89,14 +93,16 @@ int brand_splash(const char *rootfs_path, const char *logo_path)
         LOG_WARNING("Failed to set Plymouth theme (plymouth may not be installed)");
     }
 
-    // Regenerate initramfs to include the new Plymouth theme.
+    // Regenerate initramfs to embed the Plymouth theme.
     LOG_INFO("Regenerating initramfs with new theme...");
     if (run_chroot(rootfs_path, "update-initramfs -u") != 0)
     {
         LOG_WARNING("Failed to regenerate initramfs");
     }
 
-    // Re-copy the updated initrd using safe glob.
+    // Copy the updated versioned initrd to the generic name.
+    // The carrier bootloader loads /boot/initrd.img directly.
+    // For target, this overwrites the symlink but content is identical.
     char initrd_pattern[COMMAND_PATH_MAX_LENGTH];
     char initrd_src[COMMAND_PATH_MAX_LENGTH];
     char initrd_dst[COMMAND_PATH_MAX_LENGTH];

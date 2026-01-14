@@ -316,50 +316,69 @@ static void cleanup_staging(const char *staging_path)
         CLEANUP_MAX_RETRIES, staging_path);
 }
 
+/**
+ * Removes boot files from carrier rootfs before squashfs creation.
+ *
+ * The bootloader loads kernel/initrd from the ISO root, not from inside
+ * the squashfs. Removing them here saves 50-150MB.
+ */
+static void cleanup_carrier_boot(const char *rootfs_path)
+{
+    char path[COMMAND_PATH_MAX_LENGTH];
+
+    LOG_INFO("Removing boot files from carrier rootfs...");
+
+    cleanup_versioned_boot_files(rootfs_path);
+
+    snprintf(path, sizeof(path), "%s/boot/vmlinuz", rootfs_path);
+    rm_file(path);
+    snprintf(path, sizeof(path), "%s/boot/initrd.img", rootfs_path);
+    rm_file(path);
+
+    snprintf(path, sizeof(path), "%s/isolinux", rootfs_path);
+    rm_rf(path);
+}
+
 int create_iso(const char *rootfs_path, const char *output_path)
 {
     char staging_path[COMMAND_PATH_MAX_LENGTH];
 
     LOG_INFO("Creating bootable ISO image...");
 
-    // Construct the staging directory path.
     snprintf(staging_path, sizeof(staging_path), "%s/../staging-iso", rootfs_path);
 
-    // Create staging directory.
     if (create_staging_directory(staging_path) != 0)
     {
         return -1;
     }
 
-    // Create squashfs filesystem.
-    if (create_squashfs(rootfs_path, staging_path) != 0)
+    // Copy boot files before cleanup removes them from rootfs.
+    if (copy_boot_files(rootfs_path, staging_path) != 0)
     {
         cleanup_staging(staging_path);
         return -2;
     }
 
-    // Copy boot files to staging.
-    if (copy_boot_files(rootfs_path, staging_path) != 0)
+    cleanup_carrier_boot(rootfs_path);
+
+    if (create_squashfs(rootfs_path, staging_path) != 0)
     {
         cleanup_staging(staging_path);
         return -3;
     }
 
-    // Set up EFI boot image.
     if (setup_efi_image(staging_path) != 0)
     {
         cleanup_staging(staging_path);
         return -4;
     }
 
-    // Assemble the final ISO.
     if (run_xorriso(staging_path, output_path) != 0)
     {
         cleanup_staging(staging_path);
         return -5;
     }
 
-    // Clean up staging directory.
     cleanup_staging(staging_path);
 
     LOG_INFO("ISO created successfully: %s", output_path);

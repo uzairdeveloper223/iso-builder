@@ -70,9 +70,6 @@ int strip_base_rootfs(const char *path)
     snprintf(dir_path, sizeof(dir_path), "%s/etc/update-motd.d", path);
     rm_rf(dir_path);  // OK if it doesn't exist
 
-    // NOTE: Do NOT cleanup apt directories here. The target and carrier
-    // phases need apt to install packages after copying from base.
-
     LOG_INFO("Base rootfs stripped successfully");
 
     return 0;

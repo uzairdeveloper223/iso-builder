@@ -1,10 +1,11 @@
 #pragma once
 
 /**
- * Downloads and bundles .deb packages into the carrier rootfs.
+ * Downloads and bundles bootloader .deb packages into the carrier rootfs.
  *
- * Downloads packages that cannot be pre-installed (due to conflicts) and
- * stores them in the carrier rootfs for the installer to selectively install.
+ * Downloads bootloader packages (grub-pc, grub-efi) that cannot be
+ * pre-installed due to conflicts and stores them for the installer to
+ * selectively install based on the target system's boot mode.
  *
  * @param carrier_rootfs_path The path to the carrier rootfs directory.
  * @param use_cache Whether to use package caching.

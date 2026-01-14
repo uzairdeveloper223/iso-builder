@@ -25,6 +25,8 @@ int run_carrier_phase(
         return -1;
     }
 
+    cleanup_unnecessary_firmware(rootfs_dir);
+
     if (embed_target_rootfs(rootfs_dir, tarball_path) != 0)
     {
         LOG_ERROR("Failed to embed target rootfs");

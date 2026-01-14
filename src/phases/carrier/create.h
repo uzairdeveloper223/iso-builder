@@ -5,7 +5,7 @@
  *
  * The carrier rootfs is optimized for running the installer from the ISO.
  * It includes only the packages necessary to boot and run the installation
- * wizard.
+ * wizard. Copies vmlinuz-* to vmlinuz and initrd.img-* to initrd.img.
  *
  * @param base_path The path to the base rootfs to copy from.
  * @param path The directory where the rootfs will be created.

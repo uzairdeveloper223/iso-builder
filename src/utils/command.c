@@ -480,6 +480,39 @@ int copy_kernel_and_initrd(const char *rootfs_path)
     return 0;
 }
 
+int cleanup_versioned_boot_files(const char *rootfs_path)
+{
+    char boot_path[COMMAND_PATH_MAX_LENGTH];
+    char quoted_boot[COMMAND_QUOTED_MAX_LENGTH];
+    char command[COMMAND_MAX_LENGTH];
+
+    snprintf(boot_path, sizeof(boot_path), "%s/boot", rootfs_path);
+    if (shell_quote_path(boot_path, quoted_boot, sizeof(quoted_boot)) != 0)
+    {
+        LOG_ERROR("Failed to quote boot path");
+        return -1;
+    }
+
+    // Remove versioned kernel, initrd, config, and System.map files.
+    // These are created by the kernel package but not needed after
+    // copying to generic names (vmlinuz, initrd.img).
+    snprintf(
+        command, sizeof(command),
+        "find %s -maxdepth 1 \\( "
+        "-name 'vmlinuz-*' -o "
+        "-name 'initrd.img-*' -o "
+        "-name 'config-*' -o "
+        "-name 'System.map-*' "
+        "\\) -type f -delete 2>/dev/null",
+        quoted_boot
+    );
+
+    // Ignore errors since files may not exist.
+    run_command(command);
+
+    return 0;
+}
+
 /** Firmware directories to remove (relative to /usr/lib/firmware). */
 static const char *FIRMWARE_TO_REMOVE[] = {
     // WiFi firmware.
