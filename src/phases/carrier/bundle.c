@@ -33,7 +33,7 @@ static int copy_debs(const char *src_dir, const char *dst_dir)
 /**
  * Checks if cached bundles exist for a given type (bios or efi).
  */
-static int bundle_cache_exists(const char *type)
+static int has_bundle_cache(const char *type)
 {
     // Get cache directory.
     char cache_dir[COMMAND_PATH_MAX_LENGTH];
@@ -121,7 +121,7 @@ static int download_packages(const char *rootfs, const char *dest_dir, const cha
     return run_chroot(rootfs, command);
 }
 
-int bundle_packages(const char *carrier_rootfs_path, int use_cache)
+int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache)
 {
     LOG_INFO("Bundling bootloader packages into carrier rootfs...");
 
@@ -144,7 +144,7 @@ int bundle_packages(const char *carrier_rootfs_path, int use_cache)
     }
 
     // Try to restore BIOS packages from cache.
-    int bios_cached = use_cache && bundle_cache_exists("bios");
+    int bios_cached = use_cache && has_bundle_cache("bios");
     if (bios_cached)
     {
         if (restore_bundles("bios", bios_dir) != 0)
@@ -170,7 +170,7 @@ int bundle_packages(const char *carrier_rootfs_path, int use_cache)
     }
 
     // Try to restore EFI packages from cache.
-    int efi_cached = use_cache && bundle_cache_exists("efi");
+    int efi_cached = use_cache && has_bundle_cache("efi");
     if (efi_cached)
     {
         if (restore_bundles("efi", efi_dir) != 0)

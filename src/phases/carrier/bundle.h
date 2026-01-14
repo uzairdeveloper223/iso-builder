@@ -14,4 +14,4 @@
  * @return - `-1` - Indicates directory creation failure.
  * @return - `-2` - Indicates package download failure.
  */
-int bundle_packages(const char *carrier_rootfs_path, int use_cache);
+int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache);

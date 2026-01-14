@@ -52,7 +52,7 @@ int run_carrier_phase(
     }
 
     // Bundle bootloader packages.
-    if (bundle_packages(rootfs_dir, use_cache) != 0)
+    if (bundle_carrier_packages(rootfs_dir, use_cache) != 0)
     {
         LOG_ERROR("Failed to bundle packages");
         return -1;
