@@ -9,7 +9,7 @@
  * @return - `1` - Indicates cache exists and is valid.
  * @return - `0` - Indicates no valid cache found.
  */
-int cache_exists(char *out_cache_path, size_t buffer_length);
+int has_rootfs_cache(char *out_cache_path, size_t buffer_length);
 
 /**
  * Restores the base rootfs from cache.
@@ -20,7 +20,7 @@ int cache_exists(char *out_cache_path, size_t buffer_length);
  * @return - `0` - Indicates success.
  * @return - `-1` - Indicates failure.
  */
-int restore_from_cache(const char *cache_path, const char *rootfs_dir);
+int restore_rootfs_from_cache(const char *cache_path, const char *rootfs_dir);
 
 /**
  * Saves the base rootfs to cache.
@@ -30,4 +30,4 @@ int restore_from_cache(const char *cache_path, const char *rootfs_dir);
  * @return - `0` - Indicates success.
  * @return - `-1` - Indicates failure.
  */
-int save_to_cache(const char *rootfs_dir);
+int save_rootfs_to_cache(const char *rootfs_dir);

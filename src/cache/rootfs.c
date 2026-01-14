@@ -7,7 +7,7 @@
 
 #define CACHE_FILENAME "base-rootfs.tar.gz"
 
-int cache_exists(char *out_cache_path, size_t buffer_length)
+int has_rootfs_cache(char *out_cache_path, size_t buffer_length)
 {
     // Get the cache directory path.
     char cache_dir[COMMAND_PATH_MAX_LENGTH];
@@ -22,7 +22,7 @@ int cache_exists(char *out_cache_path, size_t buffer_length)
     return file_exists(out_cache_path);
 }
 
-int restore_from_cache(const char *cache_path, const char *rootfs_dir)
+int restore_rootfs_from_cache(const char *cache_path, const char *rootfs_dir)
 {
     LOG_INFO("Restoring base rootfs from cache...");
 
@@ -60,7 +60,7 @@ int restore_from_cache(const char *cache_path, const char *rootfs_dir)
     return 0;
 }
 
-int save_to_cache(const char *rootfs_dir)
+int save_rootfs_to_cache(const char *rootfs_dir)
 {
     // Get the cache directory path.
     char cache_dir[COMMAND_PATH_MAX_LENGTH];

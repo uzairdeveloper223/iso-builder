@@ -8,10 +8,10 @@ int run_base_phase(const char *rootfs_dir, int use_cache)
 {
     // Try to restore from cache if enabled.
     char cache_path[COMMAND_PATH_MAX_LENGTH];
-    if (use_cache && cache_exists(cache_path, sizeof(cache_path)))
+    if (use_cache && has_rootfs_cache(cache_path, sizeof(cache_path)))
     {
         LOG_INFO("Found cached base rootfs");
-        if (restore_from_cache(cache_path, rootfs_dir) == 0)
+        if (restore_rootfs_from_cache(cache_path, rootfs_dir) == 0)
         {
             LOG_INFO("Phase 2 complete: Base rootfs ready (from cache)");
             return 0;
@@ -36,7 +36,7 @@ int run_base_phase(const char *rootfs_dir, int use_cache)
     // Save to cache for future builds (if caching is enabled).
     if (use_cache)
     {
-        if (save_to_cache(rootfs_dir) != 0)
+        if (save_rootfs_to_cache(rootfs_dir) != 0)
         {
             // Cache save failure is not fatal - just log warning.
             LOG_WARNING("Failed to save rootfs to cache (build will continue)");

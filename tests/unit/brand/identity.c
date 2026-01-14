@@ -3,7 +3,7 @@
  * including os-release and issue file generation.
  */
 
-#include "../../../all.h"
+#include "../../all.h"
 
 /** Test rootfs path for branding tests. */
 static char test_rootfs[256];

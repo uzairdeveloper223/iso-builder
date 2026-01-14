@@ -3,7 +3,7 @@
  * functions for silent boot setup.
  */
 
-#include "../../../all.h"
+#include "../../all.h"
 
 /** Test rootfs path for GRUB tests. */
 static char test_rootfs[256];

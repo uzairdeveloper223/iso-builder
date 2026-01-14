@@ -30,8 +30,6 @@ static int teardown(void **state)
     return 0;
 }
 
-// --- setup_grub tests ---
-
 /** Verifies setup_grub() creates directory structure and valid config. */
 static void test_setup_grub_creates_valid_config(void **state)
 {
