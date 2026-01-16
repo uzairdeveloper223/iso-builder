@@ -25,9 +25,11 @@ int setup_grub(const char *rootfs_path)
 
     // Define the GRUB configuration content.
     const char *grub_cfg =
-        "set default=0\n"
-        "set timeout_style=hidden\n"
-        "set timeout=0\n"
+        "set gfxmode=auto         # Auto-detect display's native resolution.\n"
+        "set gfxpayload=keep      # Preserve video mode during kernel handoff.\n"
+        "set default=0            # Boot first menu entry.\n"
+        "set timeout_style=hidden # Hide the menu completely.\n"
+        "set timeout=0            # No delay before booting.\n"
         "\n"
         "menuentry \"" CONFIG_GRUB_MENU_ENTRY_NAME "\" {\n"
         "    linux " CONFIG_BOOT_KERNEL_PATH " " CONFIG_BOOT_KERNEL_PARAMS "\n"

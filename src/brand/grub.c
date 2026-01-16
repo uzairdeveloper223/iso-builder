@@ -21,11 +21,18 @@ int brand_grub(const char *rootfs_path)
     // Write the GRUB config file.
     char file_path[COMMAND_PATH_MAX_LENGTH];
     const char *content =
-        "GRUB_DISTRIBUTOR=\"" CONFIG_OS_NAME "\"\n"
-        "GRUB_TIMEOUT=0\n"
-        "GRUB_TIMEOUT_STYLE=hidden\n"
-        "GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash loglevel=0 vt.global_cursor_default=0\"\n"
-        "GRUB_RECORDFAIL_TIMEOUT=0\n";
+        "GRUB_DISTRIBUTOR=\"" CONFIG_OS_NAME "\"    # OS name shown in GRUB menu\n"
+        "GRUB_TIMEOUT=0                             # No delay before booting default entry\n"
+        "GRUB_TIMEOUT_STYLE=hidden                  # Hide the menu completely\n"
+        "GRUB_RECORDFAIL_TIMEOUT=0                  # Don't wait on previous boot failure\n"
+        "GRUB_GFXMODE=auto                          # Auto-detect display's native resolution\n"
+        "GRUB_GFXPAYLOAD_LINUX=keep                 # Preserve video mode during kernel handoff\n"
+        "GRUB_CMDLINE_LINUX_DEFAULT=\"" 
+        "quiet "                                    // Minimize boot messages.
+        "splash "                                   // Show splash screen.
+        "loglevel=0 "                               // Suppress kernel log messages.
+        "vt.global_cursor_default=0 "               // Hide the blinking cursor.
+        "\"\n";
     snprintf(file_path, sizeof(file_path), "%s/distributor.cfg", dir_path);
     if (write_file(file_path, content) != 0)
     {
