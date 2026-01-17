@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     char base_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
     char target_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
     char target_tarball_path[COMMAND_PATH_MAX_LENGTH];
-    char carrier_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
+    char live_rootfs_dir[COMMAND_PATH_MAX_LENGTH];
     int exit_code = 0;
     int use_cache = 1;
 
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     snprintf(base_rootfs_dir, sizeof(base_rootfs_dir), "%s/base-rootfs", build_dir);
     snprintf(target_rootfs_dir, sizeof(target_rootfs_dir), "%s/target-rootfs", build_dir);
     snprintf(target_tarball_path, sizeof(target_tarball_path), "%s/rootfs.tar.gz", build_dir);
-    snprintf(carrier_rootfs_dir, sizeof(carrier_rootfs_dir), "%s/carrier-rootfs", build_dir);
+    snprintf(live_rootfs_dir, sizeof(live_rootfs_dir), "%s/live-rootfs", build_dir);
 
     LOG_INFO("Building ISO for version %s", version);
 
@@ -125,19 +125,19 @@ int main(int argc, char *argv[])
     }
     if (check_interrupted()) return 130;
 
-    // Phase 4: Carrier - copy base, install packages, embed target.
-    if (run_carrier_phase(base_rootfs_dir, carrier_rootfs_dir, target_tarball_path, components_dir, version, use_cache) != 0)
+    // Phase 4: Live - copy base, install packages, embed target.
+    if (run_live_phase(base_rootfs_dir, live_rootfs_dir, target_tarball_path, components_dir, version, use_cache) != 0)
     {
         exit_code = 1;
         goto cleanup;
     }
     if (check_interrupted()) return 130;
 
-    // Base rootfs no longer needed after target and carrier are created.
+    // Base rootfs no longer needed after target and live are created.
     rm_rf(base_rootfs_dir);
 
     // Phase 5: Assembly - configure bootloaders and create ISO.
-    if (run_assembly_phase(carrier_rootfs_dir, version) != 0)
+    if (run_assembly_phase(live_rootfs_dir, version) != 0)
     {
         exit_code = 1;
         goto cleanup;

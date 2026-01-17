@@ -1,6 +1,6 @@
 /**
  * This code is responsible for creating a minimal base rootfs that both
- * target and carrier environments will be derived from.
+ * target and live environments will be derived from.
  */
 
 #include "all.h"

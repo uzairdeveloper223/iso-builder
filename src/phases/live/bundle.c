@@ -1,6 +1,6 @@
 /**
  * This code is responsible for downloading and bundling bootloader .deb
- * packages (with dependencies) into the carrier rootfs APT cache for the
+ * packages (with dependencies) into the live rootfs APT cache for the
  * installer to use.
  */
 
@@ -123,14 +123,14 @@ static int download_packages(const char *rootfs, const char *packages)
     return run_chroot(rootfs, command);
 }
 
-int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache)
+int bundle_live_packages(const char *live_rootfs_path, int use_cache)
 {
-    LOG_INFO("Bundling bootloader packages into carrier APT cache...");
+    LOG_INFO("Bundling bootloader packages into live APT cache...");
 
-    // Construct the APT cache directory path in the carrier rootfs.
+    // Construct the APT cache directory path in the live rootfs.
     char apt_cache_dir[COMMAND_PATH_MAX_LENGTH];
     snprintf(apt_cache_dir, sizeof(apt_cache_dir),
-        "%s" CONFIG_APT_CACHE_DIR, carrier_rootfs_path);
+        "%s" CONFIG_APT_CACHE_DIR, live_rootfs_path);
 
     // Ensure the APT cache directory exists.
     if (mkdir_p(apt_cache_dir) != 0)
@@ -155,7 +155,7 @@ int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache)
     {
         // Update package lists (needed after cleanup_apt_directories removes them).
         LOG_INFO("Updating package lists...");
-        if (run_chroot(carrier_rootfs_path, "apt-get update") != 0)
+        if (run_chroot(live_rootfs_path, "apt-get update") != 0)
         {
             LOG_ERROR("Failed to update package lists");
             return -2;
@@ -163,7 +163,7 @@ int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache)
 
         // Download BIOS bootloader packages.
         LOG_INFO("Downloading BIOS bootloader packages...");
-        if (download_packages(carrier_rootfs_path, CONFIG_BIOS_PACKAGES) != 0)
+        if (download_packages(live_rootfs_path, CONFIG_BIOS_PACKAGES) != 0)
         {
             LOG_ERROR("Failed to download BIOS bootloader packages");
             return -2;
@@ -171,7 +171,7 @@ int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache)
 
         // Download EFI bootloader packages.
         LOG_INFO("Downloading EFI bootloader packages...");
-        if (download_packages(carrier_rootfs_path, CONFIG_EFI_PACKAGES) != 0)
+        if (download_packages(live_rootfs_path, CONFIG_EFI_PACKAGES) != 0)
         {
             LOG_ERROR("Failed to download EFI bootloader packages");
             return -2;
@@ -185,8 +185,8 @@ int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache)
 
         // Clean up apt lists and cache files to reduce image size.
         // Keep only the downloaded .deb files in /var/cache/apt/archives/.
-        run_chroot(carrier_rootfs_path, "rm -rf /var/lib/apt/lists/*");
-        run_chroot(carrier_rootfs_path, "rm -f /var/cache/apt/*.bin");
+        run_chroot(live_rootfs_path, "rm -rf /var/lib/apt/lists/*");
+        run_chroot(live_rootfs_path, "rm -f /var/cache/apt/*.bin");
     }
 
     LOG_INFO("Bootloader packages bundled successfully");

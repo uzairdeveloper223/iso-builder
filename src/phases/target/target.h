@@ -4,7 +4,7 @@
  * Runs the target phase.
  *
  * Copies the base rootfs, installs target-specific packages, applies OS
- * branding, and packages the result as a tarball for embedding in the carrier.
+ * branding, and packages the result as a tarball for embedding in the live.
  *
  * @param base_rootfs_dir The path to the base rootfs to copy from.
  * @param rootfs_dir The directory for the target rootfs.

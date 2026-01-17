@@ -191,21 +191,21 @@ The build process consists of five sequential phases:
 
 2. **Base** - Creates a minimal Debian rootfs using `debootstrap`, then strips
    unnecessary files (documentation, non-English locales, unused firmware). This
-   base rootfs serves as the foundation for both the target and carrier systems.
+   base rootfs serves as the foundation for both the target and live systems.
 
 3. **Target** - Responsible for creating the system that will eventually be
    installed on the user's system for day-to-day use. Copies the base rootfs,
    installs target-specific packages, applies LimeOS branding, creates a default
    user, and packages the result as a tarball.
 
-4. **Carrier** - Responsible for creating the live system used for installation.
-   Copies the base rootfs, installs carrier-specific packages, applies LimeOS
+4. **Live** - Responsible for creating the live system used for installation.
+   Copies the base rootfs, installs live-specific packages, applies LimeOS
    branding, embeds the target tarball, installs LimeOS components, configures
    the installer to auto-start, and bundles boot-mode-specific packages
    (GRUB for BIOS/EFI).
 
 5. **Assembly** - Configures ISOLINUX (BIOS boot) and GRUB (EFI boot), creates
-   a squashfs of the carrier rootfs, and assembles the final hybrid ISO image.
+   a squashfs of the live rootfs, and assembles the final hybrid ISO image.
 
 ```
 ┌─────────────┐
@@ -214,22 +214,22 @@ The build process consists of five sequential phases:
        │
        ▼
 ┌─────────────┐
-│    Base     │  Create minimal Debian rootfs and strip it down.
+│     Base    │  Create minimal Debian rootfs and strip it down.
 └──────┬──────┘
        │
    ┌───┴──────┐
    │          │
    ▼          ▼
-┌──────┐ ┌─────────┐
-│Target│ │ Carrier │  Add packages, apply LimeOS branding.
-└──┬───┘ └────┬────┘
-   │          │
-   │      ┌───┘
-   │      │  Target rootfs tarball gets embedded into carrier.
+┌──────┐ ┌──────┐
+│Target│ │ Live │  Add packages, apply LimeOS branding.
+└──┬───┘ └───┬──┘
+   │         │
+   │      ┌──┘
+   │      │  Target rootfs tarball gets embedded into live.
    │      ▼
-   │ ┌─────────┐
-   └─│ Carrier │
-     └────┬────┘
+   │ ┌────────┐
+   └─│  Live  │
+     └────┬───┘
           │
           ▼
    ┌──────────────┐

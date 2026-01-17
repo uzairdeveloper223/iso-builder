@@ -1,6 +1,6 @@
 /**
  * This code is responsible for aggressively stripping noncritical files
- * from the base rootfs to minimize size for both target and carrier.
+ * from the base rootfs to minimize size for both target and live.
  */
 
 #include "all.h"

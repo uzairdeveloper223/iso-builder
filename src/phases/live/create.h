@@ -1,9 +1,9 @@
 #pragma once
 
 /**
- * Creates the carrier rootfs by copying from base and installing packages.
+ * Creates the live rootfs by copying from base and installing packages.
  *
- * The carrier rootfs is optimized for running the installer from the ISO.
+ * The live rootfs is optimized for running the installer from the ISO.
  * It includes only the packages necessary to boot and run the installation
  * wizard. Copies vmlinuz-* to vmlinuz and initrd.img-* to initrd.img.
  *
@@ -16,4 +16,4 @@
  * @return - `-2` - Indicates package installation failure.
  * @return - `-3` - Indicates kernel copy failure.
  */
-int create_carrier_rootfs(const char *base_path, const char *path, int use_cache);
+int create_live_rootfs(const char *base_path, const char *path, int use_cache);

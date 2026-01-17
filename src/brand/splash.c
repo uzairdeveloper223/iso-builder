@@ -101,7 +101,7 @@ int brand_splash(const char *rootfs_path, const char *logo_path)
     }
 
     // Copy the updated versioned initrd to the generic name.
-    // The carrier bootloader loads /boot/initrd.img directly.
+    // The live bootloader loads /boot/initrd.img directly.
     // For target, this overwrites the symlink but content is identical.
     char initrd_pattern[COMMAND_PATH_MAX_LENGTH];
     char initrd_src[COMMAND_PATH_MAX_LENGTH];

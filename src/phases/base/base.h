@@ -4,7 +4,7 @@
  * Runs the base phase.
  *
  * Creates a minimal, stripped rootfs that serves as the foundation for
- * both the target (installed system) and carrier (live installer) rootfs.
+ * both the target (installed system) and live (live installer) rootfs.
  * Running debootstrap once and copying saves significant build time.
  *
  * When caching is enabled, checks for a cached rootfs first and restores

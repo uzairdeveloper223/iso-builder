@@ -6,7 +6,7 @@
  * Configures bootloaders (GRUB, isolinux), sets up the splash screen,
  * and creates the final bootable hybrid ISO image.
  *
- * @param rootfs_dir The carrier rootfs directory.
+ * @param rootfs_dir The live rootfs directory.
  * @param version The version string for the ISO filename.
  *
  * @return - `0` - Indicates success.

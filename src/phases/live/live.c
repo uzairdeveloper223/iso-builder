@@ -1,10 +1,10 @@
 /**
- * This code is responsible for orchestrating the carrier phase.
+ * This code is responsible for orchestrating the live phase.
  */
 
 #include "all.h"
 
-int run_carrier_phase(
+int run_live_phase(
     const char *base_rootfs_dir,
     const char *rootfs_dir,
     const char *tarball_path,
@@ -13,17 +13,17 @@ int run_carrier_phase(
     int use_cache
 )
 {
-    // Create carrier rootfs from base.
-    if (create_carrier_rootfs(base_rootfs_dir, rootfs_dir, use_cache) != 0)
+    // Create live rootfs from base.
+    if (create_live_rootfs(base_rootfs_dir, rootfs_dir, use_cache) != 0)
     {
-        LOG_ERROR("Failed to create carrier rootfs");
+        LOG_ERROR("Failed to create live rootfs");
         return -1;
     }
 
-    // Apply carrier branding.
-    if (brand_carrier_rootfs(rootfs_dir, version) != 0)
+    // Apply live branding.
+    if (brand_live_rootfs(rootfs_dir, version) != 0)
     {
-        LOG_ERROR("Failed to brand carrier rootfs");
+        LOG_ERROR("Failed to brand live rootfs");
         return -1;
     }
 
@@ -35,14 +35,14 @@ int run_carrier_phase(
     }
 
     // Install LimeOS components (installer, etc.).
-    if (install_carrier_components(rootfs_dir, components_dir) != 0)
+    if (install_live_components(rootfs_dir, components_dir) != 0)
     {
         LOG_ERROR("Failed to install components");
         return -1;
     }
 
     // Configure init to auto-start the installer.
-    if (configure_carrier_init(rootfs_dir) != 0)
+    if (configure_live_init(rootfs_dir) != 0)
     {
         LOG_ERROR("Failed to configure init");
         return -1;
@@ -57,12 +57,12 @@ int run_carrier_phase(
 
     // Bundle boot-mode-specific packages (GRUB for BIOS/EFI). Must happen after
     // cleanup so the packages remain in /var/cache/apt/archives/.
-    if (bundle_carrier_packages(rootfs_dir, use_cache) != 0)
+    if (bundle_live_packages(rootfs_dir, use_cache) != 0)
     {
         LOG_ERROR("Failed to bundle packages");
         return -1;
     }
 
-    LOG_INFO("Phase 4 complete: Carrier rootfs created");
+    LOG_INFO("Phase 4 complete: Live rootfs created");
     return 0;
 }

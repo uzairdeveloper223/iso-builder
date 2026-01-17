@@ -1,13 +1,13 @@
 /**
- * This code is responsible for creating the carrier rootfs by copying
- * from the base rootfs and installing carrier-specific packages.
+ * This code is responsible for creating the live rootfs by copying
+ * from the base rootfs and installing live-specific packages.
  */
 
 #include "all.h"
 
-int create_carrier_rootfs(const char *base_path, const char *path, int use_cache)
+int create_live_rootfs(const char *base_path, const char *path, int use_cache)
 {
-    LOG_INFO("Creating carrier rootfs at %s", path);
+    LOG_INFO("Creating live rootfs at %s", path);
 
     // Quote the base path for shell safety.
     char quoted_base[COMMAND_QUOTED_MAX_LENGTH];
@@ -42,10 +42,10 @@ int create_carrier_rootfs(const char *base_path, const char *path, int use_cache
         package_cache_mounted = 1;
     }
 
-    // Install carrier-specific packages.
-    LOG_INFO("Installing carrier environment packages...");
+    // Install live-specific packages.
+    LOG_INFO("Installing live environment packages...");
     int install_result = run_chroot(path,
-        "apt-get install -y --no-install-recommends " CONFIG_CARRIER_PACKAGES);
+        "apt-get install -y --no-install-recommends " CONFIG_LIVE_PACKAGES);
 
     // Tear down package cache mount if it was set up.
     if (package_cache_mounted)
@@ -61,7 +61,7 @@ int create_carrier_rootfs(const char *base_path, const char *path, int use_cache
     }
 
     // Clean APT cache to remove downloaded .deb files.
-    // Bootloader packages will be downloaded later by bundle_carrier_packages.
+    // Bootloader packages will be downloaded later by bundle_live_packages.
     if (run_chroot(path, "apt-get clean") != 0)
     {
         LOG_ERROR("Failed to clean APT cache");
@@ -74,7 +74,7 @@ int create_carrier_rootfs(const char *base_path, const char *path, int use_cache
         return -4;
     }
 
-    LOG_INFO("Carrier rootfs created successfully");
+    LOG_INFO("Live rootfs created successfully");
 
     return 0;
 }

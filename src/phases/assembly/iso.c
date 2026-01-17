@@ -336,11 +336,11 @@ static void cleanup_staging(const char *staging_path)
     );
 }
 
-static void cleanup_carrier_boot(const char *rootfs_path)
+static void cleanup_live_boot(const char *rootfs_path)
 {
     char path[COMMAND_PATH_MAX_LENGTH];
 
-    LOG_INFO("Removing boot files from carrier rootfs...");
+    LOG_INFO("Removing boot files from live rootfs...");
 
     // Remove versioned boot files.
     cleanup_versioned_boot_files(rootfs_path);
@@ -379,11 +379,11 @@ int create_iso(const char *rootfs_path, const char *output_path)
         return -2;
     }
 
-    // Remove boot files from carrier rootfs to reduce squashfs size.
+    // Remove boot files from live rootfs to reduce squashfs size.
     // This creates a significant reduction of ~100MB.
-    cleanup_carrier_boot(rootfs_path);
+    cleanup_live_boot(rootfs_path);
 
-    // Create the squashfs filesystem from the carrier rootfs.
+    // Create the squashfs filesystem from the live rootfs.
     if (create_squashfs(rootfs_path, staging_path) != 0)
     {
         cleanup_staging(staging_path);

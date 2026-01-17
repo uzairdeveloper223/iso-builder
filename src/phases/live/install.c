@@ -1,17 +1,17 @@
 /**
  * This code is responsible for installing LimeOS components into the
- * carrier rootfs.
+ * live rootfs.
  */
 
 #include "all.h"
 
-int install_carrier_components(const char *rootfs_path, const char *components_path)
+int install_live_components(const char *rootfs_path, const char *components_path)
 {
     char src_path[COMMAND_PATH_MAX_LENGTH];
     char dst_path[COMMAND_PATH_MAX_LENGTH];
     char bin_dir[COMMAND_PATH_MAX_LENGTH];
 
-    LOG_INFO("Installing components into carrier rootfs...");
+    LOG_INFO("Installing components into live rootfs...");
 
     // Create the target directory for binaries.
     snprintf(bin_dir, sizeof(bin_dir), "%s" CONFIG_INSTALL_BIN_PATH, rootfs_path);

@@ -125,17 +125,17 @@
 /** The installation path for component binaries (relative to rootfs). */
 #define CONFIG_INSTALL_BIN_PATH "/usr/local/bin"
 
-/** The path where the target tarball is stored in the carrier rootfs. */
+/** The path where the target tarball is stored in the live rootfs. */
 #define CONFIG_TARGET_ROOTFS_PATH "/usr/share/limeos/rootfs.tar.gz"
 
 /** The APT cache directory where bootloader packages are pre-populated. */
 #define CONFIG_APT_CACHE_DIR "/var/cache/apt/archives"
 
 /**
- * Packages for the carrier rootfs (boots from ISO, runs installer).
+ * Packages for the live rootfs (boots from ISO, runs installer).
  * Minimal environment to run the installation wizard.
  */
-#define CONFIG_CARRIER_PACKAGES \
+#define CONFIG_LIVE_PACKAGES \
     "linux-image-amd64 "  /* Kernel                                         */ \
     "systemd-sysv "       /* Init system (SysV compat)                      */ \
     "live-boot "          /* Live system boot scripts                       */ \
