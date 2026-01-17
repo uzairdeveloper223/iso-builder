@@ -128,41 +128,46 @@
 /** The path where the target tarball is stored in the carrier rootfs. */
 #define CONFIG_TARGET_ROOTFS_PATH "/usr/share/limeos/rootfs.tar.gz"
 
-/**
- * The directory where bundled .deb packages are stored in the carrier rootfs.
- */
-#define CONFIG_PACKAGES_DIR "/usr/share/limeos/packages"
-
-/** The directory for BIOS-specific bootloader packages. */
-#define CONFIG_PACKAGES_BIOS_DIR CONFIG_PACKAGES_DIR "/bios"
-
-/** The directory for EFI-specific bootloader packages. */
-#define CONFIG_PACKAGES_EFI_DIR CONFIG_PACKAGES_DIR "/efi"
+/** The APT cache directory where bootloader packages are pre-populated. */
+#define CONFIG_APT_CACHE_DIR "/var/cache/apt/archives"
 
 /**
  * Packages for the carrier rootfs (boots from ISO, runs installer).
  * Minimal environment to run the installation wizard.
  */
 #define CONFIG_CARRIER_PACKAGES \
-    "linux-image-amd64 systemd-sysv live-boot " \
-    "plymouth plymouth-themes " \
-    "libncurses6 parted dosfstools e2fsprogs"
+    "linux-image-amd64 "  /* Kernel                                         */ \
+    "systemd-sysv "       /* Init system (SysV compat)                      */ \
+    "live-boot "          /* Live system boot scripts                       */ \
+    "plymouth "           /* Boot splash screen                             */ \
+    "plymouth-themes "    /* Splash screen themes                           */ \
+    "libncurses6 "        /* Terminal UI library (installer TUI)            */ \
+    "parted "             /* Disk partitioning (installer)                  */ \
+    "dosfstools "         /* FAT filesystem tools (EFI partition)           */ \
+    "e2fsprogs"           /* ext4 filesystem tools (root partition)         */
 
 /**
  * Packages for the target rootfs (installed to disk).
- * Full system with networking and user tools.
- *
- * Includes common grub dependencies that don't conflict between BIOS/EFI.
- * The boot-mode-specific packages are bundled separately.
+ * The boot-mode-specific GRUB packages are bundled separately.
  */
 #define CONFIG_TARGET_PACKAGES \
-    "linux-image-amd64 systemd systemd-sysv dbus " \
-    "plymouth plymouth-themes " \
-    "libpam-systemd policykit-1 " \
-    "locales console-setup keyboard-configuration " \
-    "sudo network-manager " \
-    "grub2-common grub-common ucf sensible-utils " \
-    "libefiboot1 libefivar1 libfuse3-3 os-prober"
+    "linux-image-amd64 "       /* Kernel                                    */ \
+    "systemd "                 /* Init system and service manager           */ \
+    "systemd-sysv "            /* SysV init compatibility layer             */ \
+    "dbus "                    /* IPC message bus                           */ \
+    "libpam-systemd "          /* User session management                   */ \
+    "plymouth "                /* Boot splash screen                        */ \
+    "plymouth-themes "         /* Splash screen themes                      */ \
+    "locales "                 /* Language and locale support               */ \
+    "console-setup "           /* Console font and keymap setup             */ \
+    "keyboard-configuration "  /* Keyboard layout configuration             */ \
+    "sudo "                    /* Privilege escalation                      */ \
+    "grub2-common "            /* Shared GRUB files (BIOS/EFI agnostic)     */ \
+    "grub-common "             /* More shared GRUB files                    */ \
+    "ucf "                     /* Config file update management (grub dep)  */ \
+    "sensible-utils "          /* Default editor/browser (grub dep)         */ \
+    "libefiboot1 "             /* EFI boot manager library (grub-efi dep)   */ \
+    "libefivar1"               /* EFI variable library (grub-efi dep)       */
 
 /**
  * BIOS-specific bootloader packages to bundle.

@@ -48,17 +48,18 @@ int run_carrier_phase(
         return -1;
     }
 
-    // Bundle boot-mode-specific packages (GRUB for BIOS/EFI).
-    if (bundle_carrier_packages(rootfs_dir, use_cache) != 0)
-    {
-        LOG_ERROR("Failed to bundle packages");
-        return -1;
-    }
-
-    // Clean up apt cache and lists.
+    // Clean up apt cache and lists before bundling bootloader packages.
     if (cleanup_apt_directories(rootfs_dir) != 0)
     {
         LOG_ERROR("Failed to cleanup apt directories");
+        return -1;
+    }
+
+    // Bundle boot-mode-specific packages (GRUB for BIOS/EFI). Must happen after
+    // cleanup so the packages remain in /var/cache/apt/archives/.
+    if (bundle_carrier_packages(rootfs_dir, use_cache) != 0)
+    {
+        LOG_ERROR("Failed to bundle packages");
         return -1;
     }
 

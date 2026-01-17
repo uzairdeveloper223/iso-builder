@@ -62,6 +62,13 @@ int create_target_rootfs(const char *base_path, const char *path, int use_cache)
         return -2;
     }
 
+    // Clean APT cache to remove downloaded .deb files.
+    if (run_chroot(path, "apt-get clean") != 0)
+    {
+        LOG_ERROR("Failed to clean APT cache");
+        return -3;
+    }
+
     LOG_INFO("Target rootfs created successfully");
 
     return 0;

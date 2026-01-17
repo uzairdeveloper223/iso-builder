@@ -60,10 +60,18 @@ int create_carrier_rootfs(const char *base_path, const char *path, int use_cache
         return -2;
     }
 
+    // Clean APT cache to remove downloaded .deb files.
+    // Bootloader packages will be downloaded later by bundle_carrier_packages.
+    if (run_chroot(path, "apt-get clean") != 0)
+    {
+        LOG_ERROR("Failed to clean APT cache");
+        return -3;
+    }
+
     // Copy kernel and initrd to standard paths for boot loaders.
     if (copy_kernel_and_initrd(path) != 0)
     {
-        return -3;
+        return -4;
     }
 
     LOG_INFO("Carrier rootfs created successfully");

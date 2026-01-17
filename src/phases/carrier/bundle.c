@@ -1,6 +1,7 @@
 /**
- * This code is responsible for downloading and bundling .deb packages
- * into the carrier rootfs for the installer to use.
+ * This code is responsible for downloading and bundling bootloader .deb
+ * packages (with dependencies) into the carrier rootfs APT cache for the
+ * installer to use.
  */
 
 #include "all.h"
@@ -31,11 +32,11 @@ static int copy_debs(const char *src_dir, const char *dst_dir)
 }
 
 /**
- * Checks if cached bundles exist for a given type (bios or efi).
+ * Checks if bootloader packages exist in the build cache.
  */
-static int has_bundle_cache(const char *type)
+static int has_bundle_cache(void)
 {
-    // Get cache directory.
+    // Get build cache directory.
     char cache_dir[COMMAND_PATH_MAX_LENGTH];
     if (get_cache_dir(cache_dir, sizeof(cache_dir)) != 0)
     {
@@ -44,7 +45,7 @@ static int has_bundle_cache(const char *type)
 
     // Construct bundle directory path.
     char bundle_dir[COMMAND_PATH_MAX_LENGTH];
-    snprintf(bundle_dir, sizeof(bundle_dir), "%s/packages/%s", cache_dir, type);
+    snprintf(bundle_dir, sizeof(bundle_dir), "%s/packages/bootloader", cache_dir);
 
     // Check if directory exists and has .deb files.
     char pattern[COMMAND_PATH_MAX_LENGTH];
@@ -56,11 +57,11 @@ static int has_bundle_cache(const char *type)
 }
 
 /**
- * Restores bundled packages from cache.
+ * Restores bundled packages from the build cache to the APT cache directory.
  */
-static int restore_bundles(const char *type, const char *dst_dir)
+static int restore_bundles(const char *apt_cache_dir)
 {
-    // Get cache directory.
+    // Get build cache directory.
     char cache_dir[COMMAND_PATH_MAX_LENGTH];
     if (get_cache_dir(cache_dir, sizeof(cache_dir)) != 0)
     {
@@ -69,41 +70,41 @@ static int restore_bundles(const char *type, const char *dst_dir)
 
     // Construct bundle directory path.
     char bundle_dir[COMMAND_PATH_MAX_LENGTH];
-    snprintf(bundle_dir, sizeof(bundle_dir), "%s/packages/%s", cache_dir, type);
+    snprintf(bundle_dir, sizeof(bundle_dir), "%s/packages/bootloader", cache_dir);
 
-    // Copy .deb files from cache to destination.
-    LOG_INFO("Restoring %s packages from cache...", type);
-    return copy_debs(bundle_dir, dst_dir);
+    // Copy .deb files from build cache to APT cache.
+    LOG_INFO("Restoring bootloader packages from build cache...");
+    return copy_debs(bundle_dir, apt_cache_dir);
 }
 
 /**
- * Saves bundled packages to cache.
+ * Saves bundled packages from the APT cache to the build cache.
  */
-static int save_bundles(const char *type, const char *src_dir)
+static int save_bundles(const char *apt_cache_dir)
 {
-    // Get cache directory.
+    // Get build cache directory.
     char cache_dir[COMMAND_PATH_MAX_LENGTH];
     if (get_cache_dir(cache_dir, sizeof(cache_dir)) != 0)
     {
-        LOG_WARNING("Failed to cache %s packages: cannot determine cache directory", type);
+        LOG_WARNING("Failed to save to build cache: cannot determine cache directory");
         return -1;
     }
 
     // Construct bundle directory path.
     char bundle_dir[COMMAND_PATH_MAX_LENGTH];
-    snprintf(bundle_dir, sizeof(bundle_dir), "%s/packages/%s", cache_dir, type);
+    snprintf(bundle_dir, sizeof(bundle_dir), "%s/packages/bootloader", cache_dir);
 
     // Create the bundle directory.
     if (mkdir_p(bundle_dir) != 0)
     {
-        LOG_WARNING("Failed to cache %s packages: cannot create directory", type);
+        LOG_WARNING("Failed to save to build cache: cannot create directory");
         return -1;
     }
 
-    // Copy .deb files to cache.
-    if (copy_debs(src_dir, bundle_dir) != 0)
+    // Copy all .deb files to build cache.
+    if (copy_debs(apt_cache_dir, bundle_dir) != 0)
     {
-        LOG_WARNING("Failed to cache %s packages: copy failed", type);
+        LOG_WARNING("Failed to save to build cache: copy failed");
         return -1;
     }
 
@@ -111,88 +112,81 @@ static int save_bundles(const char *type, const char *src_dir)
 }
 
 /**
- * Downloads packages using apt-get download in chroot.
+ * Downloads packages using apt-get download.
+ * Packages are downloaded to the current directory, so we cd to the APT cache first.
  */
-static int download_packages(const char *rootfs, const char *dest_dir, const char *packages)
+static int download_packages(const char *rootfs, const char *packages)
 {
-    // Build the download command.
     char command[COMMAND_MAX_LENGTH];
-    snprintf(command, sizeof(command), "cd \"%s\" && apt-get download %s", dest_dir, packages);
+    snprintf(command, sizeof(command),
+        "cd " CONFIG_APT_CACHE_DIR " && apt-get download %s", packages);
     return run_chroot(rootfs, command);
 }
 
 int bundle_carrier_packages(const char *carrier_rootfs_path, int use_cache)
 {
-    LOG_INFO("Bundling bootloader packages into carrier rootfs...");
+    LOG_INFO("Bundling bootloader packages into carrier APT cache...");
 
-    // Create BIOS packages directory.
-    char bios_dir[COMMAND_PATH_MAX_LENGTH];
-    snprintf(bios_dir, sizeof(bios_dir), "%s" CONFIG_PACKAGES_BIOS_DIR, carrier_rootfs_path);
-    if (mkdir_p(bios_dir) != 0)
+    // Construct the APT cache directory path in the carrier rootfs.
+    char apt_cache_dir[COMMAND_PATH_MAX_LENGTH];
+    snprintf(apt_cache_dir, sizeof(apt_cache_dir),
+        "%s" CONFIG_APT_CACHE_DIR, carrier_rootfs_path);
+
+    // Ensure the APT cache directory exists.
+    if (mkdir_p(apt_cache_dir) != 0)
     {
-        LOG_ERROR("Failed to create BIOS packages directory");
+        LOG_ERROR("Failed to create APT cache directory");
         return -1;
     }
 
-    // Create EFI packages directory.
-    char efi_dir[COMMAND_PATH_MAX_LENGTH];
-    snprintf(efi_dir, sizeof(efi_dir), "%s" CONFIG_PACKAGES_EFI_DIR, carrier_rootfs_path);
-    if (mkdir_p(efi_dir) != 0)
+    // Try to restore from build cache first.
+    int cached = use_cache && has_bundle_cache();
+    if (cached)
     {
-        LOG_ERROR("Failed to create EFI packages directory");
-        return -1;
-    }
-
-    // Try to restore BIOS packages from cache.
-    int bios_cached = use_cache && has_bundle_cache("bios");
-    if (bios_cached)
-    {
-        if (restore_bundles("bios", bios_dir) != 0)
+        if (restore_bundles(apt_cache_dir) != 0)
         {
-            LOG_WARNING("Failed to restore BIOS packages from cache, downloading...");
-            bios_cached = 0;
+            LOG_WARNING("Failed to restore from build cache, downloading...");
+            cached = 0;
         }
     }
 
-    // Download BIOS packages if not cached.
-    if (!bios_cached)
+    // Download packages if not in build cache.
+    if (!cached)
     {
-        LOG_INFO("Downloading BIOS packages...");
-        if (download_packages(carrier_rootfs_path, CONFIG_PACKAGES_BIOS_DIR, CONFIG_BIOS_PACKAGES) != 0)
+        // Update package lists (needed after cleanup_apt_directories removes them).
+        LOG_INFO("Updating package lists...");
+        if (run_chroot(carrier_rootfs_path, "apt-get update") != 0)
         {
-            LOG_ERROR("Failed to download BIOS packages");
+            LOG_ERROR("Failed to update package lists");
             return -2;
         }
-        if (use_cache)
-        {
-            save_bundles("bios", bios_dir);
-        }
-    }
 
-    // Try to restore EFI packages from cache.
-    int efi_cached = use_cache && has_bundle_cache("efi");
-    if (efi_cached)
-    {
-        if (restore_bundles("efi", efi_dir) != 0)
+        // Download BIOS bootloader packages.
+        LOG_INFO("Downloading BIOS bootloader packages...");
+        if (download_packages(carrier_rootfs_path, CONFIG_BIOS_PACKAGES) != 0)
         {
-            LOG_WARNING("Failed to restore EFI packages from cache, downloading...");
-            efi_cached = 0;
-        }
-    }
-
-    // Download EFI packages if not cached.
-    if (!efi_cached)
-    {
-        LOG_INFO("Downloading EFI packages...");
-        if (download_packages(carrier_rootfs_path, CONFIG_PACKAGES_EFI_DIR, CONFIG_EFI_PACKAGES) != 0)
-        {
-            LOG_ERROR("Failed to download EFI packages");
+            LOG_ERROR("Failed to download BIOS bootloader packages");
             return -2;
         }
+
+        // Download EFI bootloader packages.
+        LOG_INFO("Downloading EFI bootloader packages...");
+        if (download_packages(carrier_rootfs_path, CONFIG_EFI_PACKAGES) != 0)
+        {
+            LOG_ERROR("Failed to download EFI bootloader packages");
+            return -2;
+        }
+
+        // Save to build cache for future builds.
         if (use_cache)
         {
-            save_bundles("efi", efi_dir);
+            save_bundles(apt_cache_dir);
         }
+
+        // Clean up apt lists and cache files to reduce image size.
+        // Keep only the downloaded .deb files in /var/cache/apt/archives/.
+        run_chroot(carrier_rootfs_path, "rm -rf /var/lib/apt/lists/*");
+        run_chroot(carrier_rootfs_path, "rm -f /var/cache/apt/*.bin");
     }
 
     LOG_INFO("Bootloader packages bundled successfully");
