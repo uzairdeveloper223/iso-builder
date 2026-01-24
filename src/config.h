@@ -148,7 +148,10 @@
 
 /**
  * Packages for the target rootfs (installed to disk).
- * The boot-mode-specific GRUB packages are bundled separately.
+ *
+ * GRUB bootloader packages (CONFIG_BIOS_PACKAGES / CONFIG_EFI_PACKAGES) are
+ * excluded here because they conflict with each other. They are bundled in the
+ * ISO's APT cache and installed at runtime based on detected boot mode.
  */
 #define CONFIG_TARGET_PACKAGES \
     "linux-image-amd64 "       /* Kernel                                    */ \
@@ -167,7 +170,18 @@
     "ucf "                     /* Config file update management (grub dep)  */ \
     "sensible-utils "          /* Default editor/browser (grub dep)         */ \
     "libefiboot1 "             /* EFI boot manager library (grub-efi dep)   */ \
-    "libefivar1"               /* EFI variable library (grub-efi dep)       */
+    "libefivar1 "              /* EFI variable library (grub-efi dep)       */ \
+    "xserver-xorg-core "       /* X server (WM dep)                         */ \
+    "xserver-xorg-input-all "  /* Input drivers (WM dep)                    */ \
+    "xserver-xorg-video-all "  /* Video drivers (WM dep)                    */ \
+    "xinit "                   /* startx command (WM dep)                   */ \
+    "xterm "                   /* Default terminal emulator (WM dep)        */ \
+    "libx11-6 "                /* X11 client library (WM dep)               */ \
+    "libxcomposite1 "          /* X Composite extension (WM dep)            */ \
+    "libxi6 "                  /* X Input extension (WM dep)                */ \
+    "libxrandr2 "              /* X RandR extension (WM dep)                */ \
+    "libxfixes3 "              /* X Fixes extension (WM dep)                */ \
+    "libcairo2 "               /* Cairo graphics library (WM dep)           */
 
 /**
  * BIOS-specific bootloader packages to bundle.
