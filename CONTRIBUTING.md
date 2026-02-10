@@ -175,8 +175,8 @@ The build process consists of five sequential phases:
 
 3. **Target** - Responsible for creating the system that will eventually be
    installed on the user's system for day-to-day use. Copies the base rootfs,
-   installs target-specific packages, applies LimeOS branding, creates a default
-   user, and packages the result as a tarball.
+   installs target-specific packages, applies LimeOS branding, and packages
+   the result as a tarball.
 
 4. **Live** - Responsible for creating the live system used for installation.
    Copies the base rootfs, installs live-specific packages, applies LimeOS
@@ -216,6 +216,11 @@ The build process consists of five sequential phases:
    │   Assembly   │  Configure bootloaders, create squashfs, build ISO.
    └──────────────┘
 ```
+
+Once the ISO is booted, the installation wizard (a separate LimeOS component)
+takes over. It walks the user through locale, user, disk, and partition setup,
+then installs the target system by extracting the rootfs tarball, configuring
+the bootloader, creating user accounts, and applying locale settings.
 
 &nbsp;
 
