@@ -193,7 +193,15 @@
     "libxrandr2 "              /* X RandR extension (WM dep)                */ \
     "libxfixes3 "              /* X Fixes extension (WM dep)                */ \
     "libcairo2 "               /* Cairo graphics library (WM dep)           */ \
-    "xdm "                     /* Display manager (temporary)               */
+    "xdm "                     /* Display manager (temporary)               */ \
+    "alsa-utils "              /* Volume control (temporary)                */ \
+    "network-manager "         /* Network/WiFi management (temporary)       */ \
+    "wpasupplicant "           /* WPA/WPA2 authentication (temporary)       */ \
+    "bluez "                   /* Bluetooth support (temporary)             */ \
+    "firmware-iwlwifi "        /* Intel WiFi firmware (temporary)           */ \
+    "firmware-atheros "        /* Qualcomm/Atheros WiFi firmware (temporary)*/ \
+    "firmware-realtek "        /* Realtek WiFi firmware (temporary)         */ \
+    "firmware-brcm80211"       /* Broadcom WiFi firmware (temporary)        */
 
 /**
  * BIOS-specific bootloader packages to bundle.
